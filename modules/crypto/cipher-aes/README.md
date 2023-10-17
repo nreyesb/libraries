@@ -59,8 +59,8 @@ For more information about testing and test coverage, please refer to [Testing G
 To use the library, you can import it in your Python code:
 
 ```python
-from toku.cipher.api import Cipher # optional, if not needed, just remove Cipher type hint or put AesCipher
-from toku.cipher.aes import AesCipher
+from toku.crypto.cipher.api import Cipher # optional, if not needed, just remove Cipher type hint or put AesCipher
+from toku.crypto.cipher.aes import AesCipher
 
 key: str = "" # see the documentation of the class
 cipher: Cipher = AesCipher(key)

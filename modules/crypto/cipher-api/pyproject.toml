@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "toku-cipher-api"
+name = "toku-crypto-cipher-api"
 version = "0.1.0"
 description = "Project that provides the API for operating with cipher"
 license = "Internal"
@@ -25,27 +25,17 @@ packages = [
 
 [tool.poetry.dependencies]
 python = "~3.11"
+overrides = "^7.4.0"
 
-
-[tool.poetry.group.test.dependencies]
-pytest = "^7.4.2"
 
 [tool.poetry.group.dev.dependencies]
 pylint = "^3.0.1"
 flake8 = "^6.1.0"
 mypy = "^1.5.1"
 black = "^23.9.1"
-overrides = "^7.4.0"
 
-[tool.mypy]
-disallow_untyped_defs = true
-namespace_packages = true
-explicit_package_bases = true
-exclude = ['dist']
-
-[[tool.mypy.overrides]]
-module = "pytest.*"
-ignore_missing_imports = true
+[tool.poetry.group.test.dependencies]
+pytest = "^7.4.2"
 
 [build-system]
 requires = ["poetry-core"]

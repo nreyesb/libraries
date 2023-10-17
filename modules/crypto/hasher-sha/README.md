@@ -59,8 +59,8 @@ For more information about testing and test coverage, please refer to [Testing G
 To use the library, you can import it in your Python code:
 
 ```python
-from toku.hasher.api import Hasher # if not needed, just remove type hint or put ShaHasher
-from toku.hasher.sha import ShaHasher
+from toku.crypto.hasher.api import Hasher # if not needed, just remove type hint or put ShaHasher
+from toku.crypto.hasher.sha import ShaHasher
 hasher: Hasher = create_concrete_implementation()
 hashertext: str = hasher.hash("my_text")
 ```
