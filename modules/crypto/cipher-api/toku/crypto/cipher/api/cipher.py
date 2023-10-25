@@ -13,6 +13,7 @@ Module: cipher.py
 Author: Toku Dev
 """
 from abc import ABC, abstractmethod
+from typing import Optional
 from overrides import EnforceOverrides
 
 
@@ -28,14 +29,14 @@ class Cipher(ABC, EnforceOverrides):
     """
 
     @abstractmethod
-    def encrypt(self, plaintext: str | None) -> str:
+    def encrypt(self, plaintext: Optional[str]) -> str:
         """
         Encrypts the given plaintext.
 
         If 'plaintext' is None or empty, it returns an empty string.
 
         Args:
-            plaintext (str): The plaintext to encrypt.
+            plaintext (Optional[str]): The plaintext to encrypt.
 
         Returns:
             str: The ciphertext.
@@ -45,14 +46,14 @@ class Cipher(ABC, EnforceOverrides):
         """
 
     @abstractmethod
-    def decrypt(self, ciphertext: str | None) -> str:
+    def decrypt(self, ciphertext: Optional[str]) -> str:
         """
         Decrypts the given ciphertext.
 
         If 'ciphertext' is None or empty, it returns an empty string.
 
         Args:
-            ciphertext (str): The ciphertext to decrypt.
+            ciphertext (Optional[str]): The ciphertext to decrypt.
 
         Returns:
             str: The plaintext.

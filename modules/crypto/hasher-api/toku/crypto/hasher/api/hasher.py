@@ -13,6 +13,7 @@ Module: hasher.py
 Author: Toku Dev
 """
 from abc import ABC, abstractmethod
+from typing import Optional
 from overrides import EnforceOverrides
 
 
@@ -28,14 +29,14 @@ class Hasher(ABC, EnforceOverrides):
     """
 
     @abstractmethod
-    def hash(self, plaintext: str | None) -> str:
+    def hash(self, plaintext: Optional[str]) -> str:
         """
         Hashes the given plaintext.
 
         If 'plaintext' is None or empty, it returns an empty string.
 
         Args:
-            plaintext (str): The plaintext to hash.
+            plaintext (Optional[str]): The plaintext to hash.
 
         Returns:
             str: The hashertext.

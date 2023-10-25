@@ -12,7 +12,7 @@ prior written permission from Your Company Name.
 Module: hasher_exception.py
 Author: Toku Dev
 """
-from typing import Type
+from typing import Optional, Type
 
 
 class HasherException(Exception):
@@ -20,11 +20,11 @@ class HasherException(Exception):
     Represents a Hasher exception.
     """
 
-    def __init__(self, message: str | None = None, cause: Type[Exception] | None = None) -> None:
+    def __init__(self, message: Optional[str] = None, cause: Type[Exception] | None = None) -> None:
         """Initialize the StorageDriverException.
 
         Args:
-            message (str): A description of the error. Defaults to None.
+            message (Optional[str]): A description of the error. Defaults to None.
             cause (Exception): The exception that caused this error. Defaults to None.
         """
         super().__init__(message)

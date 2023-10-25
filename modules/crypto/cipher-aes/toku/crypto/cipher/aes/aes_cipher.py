@@ -12,6 +12,7 @@ prior written permission from Your Company Name.
 Module: aes_cipher.py
 Author: Toku Dev
 """
+from typing import Optional
 from Crypto.Cipher import AES
 from overrides import override
 from toku.crypto.cipher.api import Cipher
@@ -37,7 +38,7 @@ class AesCipher(Cipher):
         self.key: bytes = key
 
     @override
-    def encrypt(self, plaintext: str | None) -> str:
+    def encrypt(self, plaintext: Optional[str]) -> str:
         if not plaintext:
             return ""
 
@@ -49,7 +50,7 @@ class AesCipher(Cipher):
         return encrypted_bytes.hex()
 
     @override
-    def decrypt(self, ciphertext: str | None) -> str:
+    def decrypt(self, ciphertext: Optional[str]) -> str:
         if not ciphertext:
             return ""
 
