@@ -1,25 +1,25 @@
 {
   "folders": [
     {
-      "path": "modules/crypto/cipher-api"
+      "path": "modules/crypto/crypto-cipher-api"
     },
     {
-      "path": "modules/crypto/cipher-aes"
+      "path": "modules/crypto/crypto-cipher-aes"
     },
     {
-      "path": "modules/crypto/hasher-api"
+      "path": "modules/crypto/crypto-hasher-api"
     },
     {
-      "path": "modules/crypto/hasher-sha"
+      "path": "modules/crypto/crypto-hasher-sha"
     },
     {
-      "path": "modules/storage/driver-api"
+      "path": "modules/storage/storage-driver-api"
     },
     {
-      "path": "modules/storage/driver-local"
+      "path": "modules/storage/storage-driver-local"
     },"
     {
-      "path": "modules/storage/driver-gcs""
+      "path": "modules/storage/storage-driver-gcs"
     },
     {
       "path": "test"

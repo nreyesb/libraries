@@ -43,7 +43,7 @@ class GcsStorageDriverTests(AbstractStorageDriverTest[GcsStorageDriver]):
         # setup
         GcsStorageDriverTests.GCP_PROJECT_ID = os.environ.get("GCP_PROJECT_ID", "storage-gcs-test-project")
         GcsStorageDriverTests.GCP_BUCKET_NAME = os.environ.get("GCP_BUCKET_NAME", "storage-gcs-test-project-bucket")
-        GcsStorageDriverTests.GCP_CREDENTIALS = os.environ.get("GCP_CREDENTIALS_FILE", "/Users/nreyes/Documents/respositories/toku/new-repositories/modules/storage/driver-gcs/sa.json")
+        GcsStorageDriverTests.GCP_CREDENTIALS = os.environ.get("GCP_CREDENTIALS_FILE", "/Users/nreyes/Documents/respositories/toku/new-repositories/modules/storage/storage-driver-gcs/sa.json")
         GcsStorageDriverTests.WD = self._create_directory_path()
 
         credentials = service_account.Credentials.from_service_account_file(GcsStorageDriverTests.GCP_CREDENTIALS)

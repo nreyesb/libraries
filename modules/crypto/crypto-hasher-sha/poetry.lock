@@ -497,16 +497,16 @@ files = [
 ]
 
 [[package]]
-name = "toku-storage-driver-api"
+name = "toku-crypto-hasher-api"
 version = "0.1.0"
-description = "Project that provides the API for operating with storage driver"
+description = "Project that provides the API for operating with hasher"
 optional = false
 python-versions = "*"
 files = []
 
 [package.source]
 type = "file"
-url = "../driver-api/dist/toku_storage_driver_api-0.1.0.tar.gz"
+url = "../crypto-hasher-api/dist/toku_crypto_hasher_api-0.1.0.tar.gz"
 
 [[package]]
 name = "tomlkit"
@@ -533,4 +533,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "~3.11"
-content-hash = "940bf9f451b534bf2fc75222a65ba03abdd3b1c3e528d75489878f41c56caee2"
+content-hash = "d187436603f66941148de69d076b07f3b3a45c96145fa4e8f91e2296ee5e9dfc"

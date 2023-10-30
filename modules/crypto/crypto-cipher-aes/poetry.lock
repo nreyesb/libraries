@@ -547,7 +547,7 @@ files = []
 
 [package.source]
 type = "file"
-url = "../cipher-api/dist/toku_crypto_cipher_api-0.1.0.tar.gz"
+url = "../crypto-cipher-api/dist/toku_crypto_cipher_api-0.1.0.tar.gz"
 
 [[package]]
 name = "tomlkit"
