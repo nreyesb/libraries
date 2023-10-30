@@ -112,9 +112,7 @@ class AbstractStorageDriver(StorageDriver, ABC):
         input_stream: BufferedReader
 
         if isinstance(source, bytes):
-            bytes_handle = BytesIO()
-            bytes_handle.write(source)
-            bytes_handle.seek(0)  # put the cursor at the beging
+            bytes_handle = BytesIO(source)
             input_stream = BufferedReader(bytes_handle)  # type: ignore[arg-type]
         else:
             input_stream = source

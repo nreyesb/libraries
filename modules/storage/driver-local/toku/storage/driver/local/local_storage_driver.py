@@ -32,7 +32,18 @@ class LocalStorageDriver(AbstractStorageDriver):
     instance application has the access to work within the `root`.
     """
 
-    def __init__(self, root: str, separator: DirectorySeparator = DirectorySeparator.SLASH) -> None:
+    def __init__(
+            self,
+            root: str,
+            separator: DirectorySeparator = DirectorySeparator.SLASH
+    ) -> None:
+        """
+        Initializes a new Local storage driver.
+
+        Args:
+            root (str): The working directory.
+            separator (DirectorySeparator): The directory separator. Defaults to DirectorySeparator.SLASH.
+        """
         super().__init__(root, separator)
 
     @override

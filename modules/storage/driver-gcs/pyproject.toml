@@ -1,7 +1,7 @@
 [tool.poetry]
-name = "toku-crypto-cipher-aes"
+name = "toku-storage-driver-gcs"
 version = "0.1.0"
-description = "Project that provides the AES implemention for operating with cipher"
+description = "Project that provides the Google Cloud Storage (GCS) implemention for operating with storage driver"
 license = "Internal"
 authors = [
     "Toku Dev <dev@trytoku.com>"
@@ -19,14 +19,16 @@ classifiers = [
     "Topic :: Software Development :: Libraries"
 ]
 packages = [
-    {include = "toku"}
+    {include = "toku"},
+    {include = "tests"}
 ]
 
 [tool.poetry.dependencies]
 python = "~3.11"
 overrides = "^7.4.0"
-pycryptodome = "~3.19.0"
-toku-crypto-cipher-api = "~0.1.0"
+toku-storage-driver-api = "~0.1.0"
+google-cloud-storage = "^2.12.0"
+google-auth = "^2.23.3"
 pytest-xdist = "^3.3.1"
 
 

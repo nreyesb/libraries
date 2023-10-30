@@ -16,6 +16,12 @@
       "path": "modules/storage/driver-api"
     },
     {
+      "path": "modules/storage/driver-local"
+    },"
+    {
+      "path": "modules/storage/driver-gcs""
+    },
+    {
       "path": "test"
     }
   ],

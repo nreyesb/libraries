@@ -129,9 +129,7 @@ class PathSanitizerStorageDriverDecoratorTests:
         Returns:
             InputStream: The input stream.
         """
-        bytes_handle = BytesIO()
-        bytes_handle.write(self.create_byte_array())
-        bytes_handle.seek(0)  # put the cursor at the beging
+        bytes_handle = BytesIO(self.create_byte_array())
         return BufferedReader(bytes_handle)  # type: ignore[arg-type]
 
     def test_open__verify_method_invocation__then_return_void(

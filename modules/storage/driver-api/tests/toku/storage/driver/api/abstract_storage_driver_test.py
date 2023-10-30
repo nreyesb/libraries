@@ -97,7 +97,7 @@ class AbstractStorageDriverTest(StorageDriverTest[T], ABC, EnforceOverrides, Gen
         Returns:
             bytearray: The byte array.
         """
-        return self.fake.sentence(words)
+        return f"{self.fake.sentence(words)}"
 
     def create_byte_array(self) -> bytes:
         """
@@ -118,9 +118,7 @@ class AbstractStorageDriverTest(StorageDriverTest[T], ABC, EnforceOverrides, Gen
         Returns:
             InputStream: The input stream.
         """
-        bytes_handle = BytesIO()
-        bytes_handle.write(content if content else self.create_byte_array())
-        bytes_handle.seek(0)  # put the cursor at the beging
+        bytes_handle = BytesIO(content if content else self.create_byte_array())
         return BufferedReader(bytes_handle)  # type: ignore[arg-type]
 
     def create_file_in_local(
@@ -2470,11 +2468,17 @@ class AbstractStorageDriverTest(StorageDriverTest[T], ABC, EnforceOverrides, Gen
         assert self.storage_driver.make_directory("root")
         assert self.storage_driver.exists_directory("root")
         assert self.storage_driver.exists_directory("directory")
+        assert not self.storage_driver.exists_directory("rename1")
+        assert not self.storage_driver.exists_directory("rename2")
         assert len(self.storage_driver.files("root")) == 0
         assert len(self.storage_driver.files("directory")) == 1
 
         assert self.storage_driver.rename_directory("root", "rename1")
         assert self.storage_driver.rename_directory("directory", "rename2")
+        assert not self.storage_driver.exists_directory("root")
+        assert not self.storage_driver.exists_directory("directory")
+        assert self.storage_driver.exists_directory("rename1")
+        assert self.storage_driver.exists_directory("rename2")
         assert len(self.storage_driver.directories("")) == 2
         assert len(self.storage_driver.files("rename1")) == 0
         assert len(self.storage_driver.files("rename2")) == 1
