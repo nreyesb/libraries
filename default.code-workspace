@@ -20,9 +20,6 @@
     },"
     {
       "path": "modules/storage/storage-driver-gcs"
-    },
-    {
-      "path": "test"
     }
   ],
   "settings": {
