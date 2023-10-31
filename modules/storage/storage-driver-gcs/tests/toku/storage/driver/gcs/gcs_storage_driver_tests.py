@@ -19,7 +19,7 @@ Module: gcs_storage_driver_tests.py
 Author: Toku Dev
 """
 import os
-from typing import Any, Generator
+from typing import Any, Generator, final
 import uuid
 from google.oauth2 import service_account  # type:ignore[import-untyped]
 from google.cloud import storage  # type:ignore[import-untyped]
@@ -28,22 +28,25 @@ import pytest
 from tests.toku.storage.driver.api import AbstractStorageDriverTest
 from toku.storage.driver.gcs import GcsStorageDriver
 
+
+@final
 class GcsStorageDriverTests(AbstractStorageDriverTest[GcsStorageDriver]):
     """
     Provides the local storage driver tests.
     """
+
     GCP_PROJECT_ID: str = ""
     GCP_BUCKET_NAME: str = ""
     GCP_CREDENTIALS: str = ""
-    WD: str = ""
     BUCKET: Any | None = None
+    WD: str = ""
 
     @pytest.fixture(scope="class", autouse=True)
     def setup_tests(self) -> Generator[None, None, None]:
         # setup
-        GcsStorageDriverTests.GCP_PROJECT_ID = os.environ.get("GCP_PROJECT_ID", "storage-gcs-test-project")
-        GcsStorageDriverTests.GCP_BUCKET_NAME = os.environ.get("GCP_BUCKET_NAME", "storage-gcs-test-project-bucket")
-        GcsStorageDriverTests.GCP_CREDENTIALS = os.environ.get("GCP_CREDENTIALS_FILE", "/Users/nreyes/Documents/respositories/toku/new-repositories/modules/storage/storage-driver-gcs/sa.json")
+        GcsStorageDriverTests.GCP_PROJECT_ID = os.environ.get("GCP_PROJECT_ID", "")
+        GcsStorageDriverTests.GCP_BUCKET_NAME = os.environ.get("GCP_BUCKET_NAME", "")
+        GcsStorageDriverTests.GCP_CREDENTIALS = os.environ.get("GCP_CREDENTIALS_FILE", "")
         GcsStorageDriverTests.WD = self._create_directory_path()
 
         credentials = service_account.Credentials.from_service_account_file(GcsStorageDriverTests.GCP_CREDENTIALS)
@@ -58,6 +61,11 @@ class GcsStorageDriverTests(AbstractStorageDriverTest[GcsStorageDriver]):
         yield
 
         # teardown
+        blobs = GcsStorageDriverTests.BUCKET.list_blobs(prefix=GcsStorageDriverTests.WD)
+
+        for blob in blobs:
+            blob.delete()
+
         self._storage.close()
 
     @override
@@ -105,7 +113,6 @@ class GcsStorageDriverTests(AbstractStorageDriverTest[GcsStorageDriver]):
 
     @override
     def test_open__successful_driver_initialization__then_return_void(self) -> None:
-        assert os.path.exists(self.tempdir.name)
         storage_driver: GcsStorageDriver = self._create_storage_driver()
         storage_driver.open()
 
@@ -140,7 +147,6 @@ class GcsStorageDriverTests(AbstractStorageDriverTest[GcsStorageDriver]):
 
     @override
     def test_close__successful_driver_completion__then_return_void(self) -> None:
-        assert os.path.exists(self.tempdir.name)
         storage_driver = GcsStorageDriver(
             self._working_directory_primary_storage_driver,
             GcsStorageDriverTests.GCP_PROJECT_ID,

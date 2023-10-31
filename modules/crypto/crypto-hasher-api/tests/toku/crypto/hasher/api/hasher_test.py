@@ -1,5 +1,10 @@
 # -*- coding: utf-8 -*-
 # flake8: noqa: E501
+# pylint: disable=missing-function-docstring
+# pylint: disable=empty-docstring
+# pylint: disable=line-too-long
+# pylint: disable=attribute-defined-outside-init
+# pylint: disable=too-many-lines
 """
 Private License - For Internal Use Only
 
@@ -14,7 +19,7 @@ Module: hasher_test.py
 Author: Toku Dev
 """
 from abc import ABC, abstractmethod
-from typing import final, TypeVar, Generic
+from typing import Generator, final, TypeVar, Generic
 from overrides import EnforceOverrides
 import pytest
 from toku.crypto.hasher.api import Hasher
@@ -27,14 +32,21 @@ class HasherTest(ABC, EnforceOverrides, Generic[T]):
     Provides test cases for any kind Hasher class.
     """
 
-    @pytest.fixture
-    def hasher(self) -> T:
+    @pytest.fixture(autouse=True)
+    def setup_test(self) -> Generator[None, None, None]:
         """
-        Fixture to return an instance of the Hasher class for testing.
+        Create an instance of the Hasher class for testing.
+
+        Return the control to the test.
+
+        Yields:
+            Generator[None, None, None]: _description_
         """
-        hasher: T = self._create_hasher()
-        assert hasher
-        return hasher
+        # setup
+        self._hasher: T = self._create_hasher()
+
+        # return control to the test
+        yield
 
     @pytest.fixture
     def plain_vs_hasher_texts(self) -> dict[str, str]:
@@ -46,38 +58,39 @@ class HasherTest(ABC, EnforceOverrides, Generic[T]):
         return values
 
     @final
-    def test_hash__with_none_text__then_return_empty_string(self, hasher: T) -> None:
+    def test_hash__with_none_text__then_return_empty_string(self) -> None:
         """
         Verifies hash case for none text.
 
         Args:
             hasher (T): An instance of the Hasher class for testing.
         """
-        assert hasher.hash(None) == ""
+        assert self._hasher.hash(None) == ""
 
     @final
-    def test_hash__with_empty_text__then_return_empty_string(self, hasher: T) -> None:
+    def test_hash__with_empty_text__then_return_empty_string(self) -> None:
         """
         Verifies hash case for empty text.
 
         Args:
             hasher (T): An instance of the Hasher class for testing.
         """
-        assert hasher.hash("") == ""
+        assert self._hasher.hash("") == ""
 
     @final
-    def test_hash__with_blank_text__then_return_no_empty_string(self, hasher: T) -> None:
+    def test_hash__with_blank_text__then_return_no_empty_string(self) -> None:
         """
         Verifies hash case for blank text.
 
         Args:
             hasher (T): An instance of the Hasher class for testing.
         """
-        assert hasher.hash(" ") != ""
+        assert self._hasher.hash(" ") != ""
 
     @final
     def test_hash__with_reported_text__then_return_encrypted_string(
-        self, hasher: T, plain_vs_hasher_texts: dict[str, str]
+        self,
+        plain_vs_hasher_texts: dict[str, str]
     ) -> None:
         """
         Verifies hashes case for not none and not empty text.
@@ -91,7 +104,7 @@ class HasherTest(ABC, EnforceOverrides, Generic[T]):
             plain_vs_hasher_texts (dict[str, str]): Plain vs hasher texts for testing
         """
         for plaintext, hashertext in plain_vs_hasher_texts.items():
-            hash_value: str = hasher.hash(plaintext)
+            hash_value: str = self._hasher.hash(plaintext)
             assert hash_value
             assert hash_value != plaintext
             assert hash_value == hashertext

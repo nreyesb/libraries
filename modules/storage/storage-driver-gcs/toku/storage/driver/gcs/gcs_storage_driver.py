@@ -13,7 +13,10 @@ Module: gcs_storage_driver.py
 Author: Toku Dev
 """
 from io import BufferedReader, BytesIO
+import os
+from tempfile import NamedTemporaryFile
 import time
+from typing import final
 from google.oauth2 import service_account  # type:ignore[import-untyped]
 from google.cloud import storage  # type:ignore[import-untyped]
 from overrides import override
@@ -24,6 +27,41 @@ from toku.storage.driver.api import AbstractStorageDriver
 from toku.storage.driver.api import StorageDriverException
 
 
+@final
+class CustomBufferedReader(BufferedReader):
+    """
+    Helper BufferedReader to wrap a file a return it as an input stream,
+    finally after reading it the file is deleted from the local disk.
+    """
+
+    def __init__(  # type:ignore[no-untyped-def]
+            self,
+            file
+    ) -> None:
+        """
+        Starts the wrapper buffered reader with the temporal file `file`.
+        """
+        super().__init__(open(file.name, 'rb'))  # type:ignore[arg-type]
+        self._file = file
+
+    def __exit__(  # type:ignore[no-untyped-def]
+            self,
+            exc_type,
+            exc_value,
+            traceback
+    ) -> None:
+        """
+        Close the buffered reader (the object created after opened the file)
+        and remove the temporal file itself from the local disk.
+        """
+        try:
+            self.close()
+            self._file.close()
+        finally:
+            os.remove(self._file.name)
+
+
+@final
 class GcsStorageDriver(AbstractStorageDriver):
     """
     Provides the storage driver to work with Google Cloud Storage (a blob storage),
@@ -80,10 +118,19 @@ class GcsStorageDriver(AbstractStorageDriver):
         self._storage.close()
 
     @override
-    def _get_as_input_stream_internal(self, file: str) -> BufferedReader:
-        # TODO: improve it, don't download all the content in memory
+    def _get_as_input_stream(self, file: str) -> BufferedReader:
+        # the process copies the blob to a local file to avoid loading the
+        # whole content in memory (poor perfomance), on that way it can return
+        # a buffered reader from a temporal file in the local disk and delete
+        # it after reading, to do that the CustomBufferedReader class extends
+        # the BufferedReader class to wrap the temporal file and the input
+        # stream, finally in the __exit__ method it delete the file.
         blob = self._create_blob(file)
-        return BufferedReader(BytesIO(blob.download_as_bytes()))  # type: ignore[arg-type]
+
+        with NamedTemporaryFile(delete=False) as temp_file:
+            blob.download_to_file(temp_file)
+
+        return CustomBufferedReader(temp_file)
 
     @override
     def exists(self, file: str) -> bool:
@@ -91,15 +138,15 @@ class GcsStorageDriver(AbstractStorageDriver):
         return blob.exists() and not blob.name.endswith("/")
 
     @override
-    def _put_file_as_internal(self, source: BufferedReader, file: str) -> bool:
+    def _put_file_as(self, source: BufferedReader, file: str) -> bool:
         blob = self._create_blob(file)
         blob.upload_from_file(source)
         return True
 
     @override
-    def _append_internal(self, source: bytes, file: str) -> bool:
+    def _append(self, source: bytes, file: str) -> bool:
         append_blob_path = f"{file}.append{str(int(time.time() * 1000))}"
-        self._put_file_as_internal(
+        self._put_file_as(
             BufferedReader(BytesIO(source)), append_blob_path  # type: ignore[arg-type]
         )
         try:
@@ -108,23 +155,23 @@ class GcsStorageDriver(AbstractStorageDriver):
             target_blob.compose([target_blob, append_blob])
             return True
         finally:
-            self._delete_internal(append_blob_path)
+            self._delete(append_blob_path)
 
     @override
-    def _delete_internal(self, file: str) -> bool:
+    def _delete(self, file: str) -> bool:
         blob = self._create_blob(file)
         blob.delete()
         self._check_parent_directory_and_create(file)
         return True
 
     @override
-    def _rename_internal(self, source: str, target: str) -> bool:
+    def _rename(self, source: str, target: str) -> bool:
         blob = self._create_blob(source)
         self._bucket.rename_blob(blob, self._add_root_in_path(target))
         return self.exists(target)
 
     @override
-    def _files_internal(self, directory: str) -> list[str]:
+    def _files(self, directory: str) -> list[str]:
         # `delimiter` is used to get only the files in the `directory`
         blobs = self._bucket.list_blobs(
             prefix=self._add_root_in_path(directory, True),
@@ -139,7 +186,7 @@ class GcsStorageDriver(AbstractStorageDriver):
         ]
 
     @override
-    def _all_files_internal(self, directory: str) -> list[str]:
+    def _all_files(self, directory: str) -> list[str]:
         blobs = self._bucket.list_blobs(
             prefix=self._add_root_in_path(directory, True)
         )
@@ -152,7 +199,7 @@ class GcsStorageDriver(AbstractStorageDriver):
         ]
 
     @override
-    def _directories_internal(self, directory: str) -> list[str]:
+    def _directories(self, directory: str) -> list[str]:
         # `match_glob` is used to get only the directories in the `directory`
         blobs = self._bucket.list_blobs(
             prefix=self._add_root_in_path(directory, True),
@@ -167,7 +214,7 @@ class GcsStorageDriver(AbstractStorageDriver):
         ]
 
     @override
-    def _all_directories_internal(self, directory: str) -> list[str]:
+    def _all_directories(self, directory: str) -> list[str]:
         blobs = self._bucket.list_blobs(
             prefix=self._add_root_in_path(directory, True)
         )
@@ -185,7 +232,7 @@ class GcsStorageDriver(AbstractStorageDriver):
         return blob.exists() and blob.name.endswith("/") is True
 
     @override
-    def _make_directory_internal(self, directory: str) -> bool:
+    def _make_directory(self, directory: str) -> bool:
         # the directory concept doesn't exists in cloud storage, so to
         # emulate the behavior it's possible to use a '/' with a empty
         # content, if the '/' doesn't have an empty content the API
@@ -206,12 +253,12 @@ class GcsStorageDriver(AbstractStorageDriver):
         return True
 
     @override
-    def _delete_directory_internal(self, directory: str) -> bool:
+    def _delete_directory(self, directory: str) -> bool:
         # delete all files
         # the list need to return only a True or empty to continue processing
         deleted_files_result: list[bool] = list(set(
-            self._delete_internal(file)
-            for file in self._all_files_internal(directory)
+            self._delete(file)
+            for file in self._all_files(directory)
         ))
 
         if deleted_files_result and \
@@ -221,8 +268,8 @@ class GcsStorageDriver(AbstractStorageDriver):
         # delete all directories
         # the list need to return only a True or empty to continue processing
         deleted_directories_result: list[bool] = list(set(
-            self._delete_directory_internal(d)
-            for d in self._all_directories_internal(directory)
+            self._delete_directory(d)
+            for d in self._all_directories(directory)
         ))
 
         if deleted_directories_result and \
@@ -237,17 +284,17 @@ class GcsStorageDriver(AbstractStorageDriver):
         return True
 
     @override
-    def _rename_directory_internal(self, source: str, target: str) -> bool:
-        if self._make_directory_internal(target):
-            for file in self._all_files_internal(source):
+    def _rename_directory(self, source: str, target: str) -> bool:
+        if self._make_directory(target):
+            for file in self._all_files(source):
                 target_path: str = self._sanitizer.concat(
                     target,
                     file.replace(self._sanitizer.add_directory_separator(source), "")
                 )
 
-                if not self._rename_internal(file, target_path):
+                if not self._rename(file, target_path):
                     return False
-            return self._delete_directory_internal(source)
+            return self._delete_directory(source)
         return False
 
     @override
@@ -269,7 +316,7 @@ class GcsStorageDriver(AbstractStorageDriver):
 
     @override
     def _get_metadata_from_directory(self, directory: str) -> Metadata:
-        metadatas = [self._get_metadata_from_file(f) for f in self._all_files_internal(directory)]
+        metadatas = [self._get_metadata_from_file(f) for f in self._all_files(directory)]
         return Metadata(
             size=Size(sum(m.size.length for m in metadatas)),
             creation_time=min(m.creation_time for m in metadatas),
@@ -366,5 +413,5 @@ class GcsStorageDriver(AbstractStorageDriver):
             directory: str = self._sanitizer.get_parent(path)
 
             if not self.exists_directory(directory) and \
-               not self._make_directory_internal(directory):
+               not self._make_directory(directory):
                 raise StorageDriverException(f"Could not create the parent directory {directory}")

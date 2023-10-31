@@ -12,10 +12,12 @@ prior written permission from Your Company Name.
 Module: sha1_hasher.py
 Author: Toku Dev
 """
+from typing import final
 from toku.crypto.hasher.sha import ShaHasher
 from toku.crypto.hasher.sha import ShaType
 
 
+@final
 class Sha1Hasher(ShaHasher):
     """
     Provides an SHA1 implementation for hash.

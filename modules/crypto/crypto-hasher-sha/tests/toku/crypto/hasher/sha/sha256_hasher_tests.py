@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
+# flake8: noqa: E501
+# pylint: disable=missing-function-docstring
+# pylint: disable=empty-docstring
 # pylint: disable=line-too-long
-# pylint: disable=unsubscriptable-object
-# flake8: noqa F501
+# pylint: disable=attribute-defined-outside-init
+# pylint: disable=too-many-lines
 """
 Private License - For Internal Use Only
 
@@ -15,11 +18,13 @@ prior written permission from Your Company Name.
 Module: sha256_hasher_tests.py
 Author: Toku Dev
 """
+from typing import final
 from overrides import override
 from tests.toku.crypto.hasher.api import HasherTest
 from toku.crypto.hasher.sha import Sha256Hasher
 
 
+@final
 class Sha256HasherTests(HasherTest[Sha256Hasher]):
     """
     Provides test cases for Sha256Hasher class.

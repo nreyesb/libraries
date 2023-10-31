@@ -25,10 +25,12 @@ from toku.storage.driver.api import StorageDriver
 
 class AbstractStorageDriver(StorageDriver, ABC):
     """
-    The `AbstractStorageDriver` class provides a base for working with storage drivers.
+    The `AbstractStorageDriver` class provides a base for working with storage
+    drivers.
 
-    All methods using the pattern `{method}_internal` provide the specific logic to
-    execute the final action of similar processes.
+    All methods using the pattern `_{method}` that have another with the same
+    name but public provide the specific logic to execute the final action of
+    similar processes.
     """
 
     def __init__(self, root: str, separator: DirectorySeparator) -> None:
@@ -55,10 +57,10 @@ class AbstractStorageDriver(StorageDriver, ABC):
 
     @override
     def get_as_input_stream(self, file: str) -> Optional[BufferedReader]:
-        return self._get_as_input_stream_internal(file) if self.exists(file) else None
+        return self._get_as_input_stream(file) if self.exists(file) else None
 
     @abstractmethod
-    def _get_as_input_stream_internal(self, file: str) -> BufferedReader:
+    def _get_as_input_stream(self, file: str) -> BufferedReader:
         """
         Provide the process to get a BufferedReader object as an input stream from a file.
 
@@ -107,7 +109,7 @@ class AbstractStorageDriver(StorageDriver, ABC):
         # put the file
         if isinstance(source, str):
             with open(source, "rb") as f:
-                return self._put_file_as_internal(f, file)
+                return self._put_file_as(f, file)
 
         input_stream: BufferedReader
 
@@ -117,10 +119,10 @@ class AbstractStorageDriver(StorageDriver, ABC):
         else:
             input_stream = source
 
-        return self._put_file_as_internal(input_stream, file)
+        return self._put_file_as(input_stream, file)
 
     @abstractmethod
-    def _put_file_as_internal(self, source: BufferedReader, file: str) -> bool:
+    def _put_file_as(self, source: BufferedReader, file: str) -> bool:
         """
         Provide the process to put the content from source into a file.
 
@@ -140,10 +142,10 @@ class AbstractStorageDriver(StorageDriver, ABC):
         if not self.exists(file):  # file doesn't exist
             return False
 
-        return self._append_internal(source, file)
+        return self._append(source, file)
 
     @abstractmethod
-    def _append_internal(self, source: bytes, file: str) -> bool:
+    def _append(self, source: bytes, file: str) -> bool:
         """
         Provide the process to append content to a file.
 
@@ -183,7 +185,7 @@ class AbstractStorageDriver(StorageDriver, ABC):
            not target_storage_driver.delete(target):  # delete if exists
             return False
 
-        with self._get_as_input_stream_internal(source) as input_stream:
+        with self._get_as_input_stream(source) as input_stream:
             return target_storage_driver.put_file_as(input_stream, target)
 
     @override
@@ -194,7 +196,7 @@ class AbstractStorageDriver(StorageDriver, ABC):
         target_storage_driver: Optional['StorageDriver'] = None
     ) -> bool:
         if self.copy(source, target, target_storage_driver):
-            return self._delete_internal(source)
+            return self._delete(source)
 
         return False
 
@@ -206,10 +208,10 @@ class AbstractStorageDriver(StorageDriver, ABC):
         if self.exists_directory(file):  # file is directory
             return False
 
-        return self._delete_internal(file)
+        return self._delete(file)
 
     @abstractmethod
-    def _delete_internal(self, file: str) -> bool:
+    def _delete(self, file: str) -> bool:
         """
         Provide the process to delete a file.
 
@@ -239,10 +241,10 @@ class AbstractStorageDriver(StorageDriver, ABC):
         if source == target:  # source equals to target
             return False
 
-        return self._rename_internal(source, target)
+        return self._rename(source, target)
 
     @abstractmethod
-    def _rename_internal(self, source: str, target: str) -> bool:
+    def _rename(self, source: str, target: str) -> bool:
         """
         Provide the process to rename a file from source to target.
 
@@ -256,10 +258,10 @@ class AbstractStorageDriver(StorageDriver, ABC):
 
     @override
     def files(self, directory: str) -> list[str]:
-        return self.files_or_directories(directory, self._files_internal)
+        return self._files_or_directories(directory, self._files)
 
     @abstractmethod
-    def _files_internal(self, directory: str) -> list[str]:
+    def _files(self, directory: str) -> list[str]:
         """
         Provide the process to get the files in the specified directory.
 
@@ -272,10 +274,10 @@ class AbstractStorageDriver(StorageDriver, ABC):
 
     @override
     def all_files(self, directory: str) -> list[str]:
-        return self.files_or_directories(directory, self._all_files_internal)
+        return self._files_or_directories(directory, self._all_files)
 
     @abstractmethod
-    def _all_files_internal(self, directory: str) -> list[str]:
+    def _all_files(self, directory: str) -> list[str]:
         """
         Provide the process to get all files, recursively, in the specified directory.
 
@@ -288,10 +290,10 @@ class AbstractStorageDriver(StorageDriver, ABC):
 
     @override
     def directories(self, directory: str) -> list[str]:
-        return self.files_or_directories(directory, self._directories_internal)
+        return self._files_or_directories(directory, self._directories)
 
     @abstractmethod
-    def _directories_internal(self, directory: str) -> list[str]:
+    def _directories(self, directory: str) -> list[str]:
         """
         Provide the process to get the directories in the specified directory.
 
@@ -304,10 +306,10 @@ class AbstractStorageDriver(StorageDriver, ABC):
 
     @override
     def all_directories(self, directory: str) -> list[str]:
-        return self.files_or_directories(directory, self._all_directories_internal)
+        return self._files_or_directories(directory, self._all_directories)
 
     @abstractmethod
-    def _all_directories_internal(self, directory: str) -> list[str]:
+    def _all_directories(self, directory: str) -> list[str]:
         """
         Provide the process to get all directories, recursively, in the specified directory.
 
@@ -318,7 +320,7 @@ class AbstractStorageDriver(StorageDriver, ABC):
             list[str]: List of all subdirectories in the directory and its subdirectories.
         """
 
-    def files_or_directories(
+    def _files_or_directories(
         self,
         directory: str,
         get_resources: Callable[[str], list[str]]
@@ -443,7 +445,7 @@ class AbstractStorageDriver(StorageDriver, ABC):
         source_parent: str = self._sanitizer.get_parent(source)
 
         # copy files of the directory
-        for file in self._all_files_internal(source):
+        for file in self._all_files(source):
             file_path: str = self._sanitizer.sanitize(
                 self._sanitizer.sanitize(file).replace(source_parent, ""),
                 True
@@ -453,7 +455,7 @@ class AbstractStorageDriver(StorageDriver, ABC):
                 if not target or not target.strip() \
                 else self._sanitizer.concat(target, file_path)
 
-            with self._get_as_input_stream_internal(file) as input_stream:
+            with self._get_as_input_stream(file) as input_stream:
                 if not target_storage_driver.put_file_as(input_stream, target_path):
                     return False
                 if remove_source and not self.delete(file):
@@ -461,7 +463,7 @@ class AbstractStorageDriver(StorageDriver, ABC):
 
         # if remove_source is true then delete the folder
         if remove_source:
-            return self._delete_directory_internal(source)
+            return self._delete_directory(source)
 
         return True
 
@@ -476,10 +478,10 @@ class AbstractStorageDriver(StorageDriver, ABC):
         if self.exists(directory):  # directory is file
             return False
 
-        return self._make_directory_internal(directory)
+        return self._make_directory(directory)
 
     @abstractmethod
-    def _make_directory_internal(self, directory: str) -> bool:
+    def _make_directory(self, directory: str) -> bool:
         """
         Provide the process to create a directory.
 
@@ -501,10 +503,10 @@ class AbstractStorageDriver(StorageDriver, ABC):
         if self.exists(directory):  # directory is file
             return False
 
-        return self._delete_directory_internal(directory)
+        return self._delete_directory(directory)
 
     @abstractmethod
-    def _delete_directory_internal(self, directory: str) -> bool:
+    def _delete_directory(self, directory: str) -> bool:
         """
         Provide the process to delete a directory.
 
@@ -538,10 +540,10 @@ class AbstractStorageDriver(StorageDriver, ABC):
         if source == target:  # source equals to target
             return False
 
-        return self._rename_directory_internal(source, target)
+        return self._rename_directory(source, target)
 
     @abstractmethod
-    def _rename_directory_internal(self, source: str, target: str) -> bool:
+    def _rename_directory(self, source: str, target: str) -> bool:
         """
         Provide the process to rename a directory from source to target.
 

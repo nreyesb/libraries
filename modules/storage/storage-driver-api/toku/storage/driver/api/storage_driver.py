@@ -24,7 +24,7 @@ import humanize
 
 class Status(Enum):
     """
-    Provides the possible status values for the storage driver.
+    Provides the possibles status values for the storage driver.
     """
 
     NOT_OPENED = "NOT_OPENED"
@@ -34,7 +34,7 @@ class Status(Enum):
 
 class DirectorySeparator(Enum):
     """
-    Provides the diferrents kinds of path separator
+    Provides the diferrents kinds of directory separator for paths
     """
 
     SLASH = "/"
@@ -96,17 +96,24 @@ class StorageDriver(ABC, EnforceOverrides):
 
     Consider the following as part of the specification:
 
-    - The root returned with get_root() is the working directory where each file
+    - The root returned with `get_root()` is the working directory where each file
       and directory have to be.
-    - The separator returned with get_separator() is to indicate how the directories
+    - The separator returned with `get_separator()` is to indicate how the directories
       are separated.
+    - The `open()` and `close()` method are to initialize and release the resources
+      of the storage driver.
 
     Consider the following as not part of the specification but highly recommended:
 
     - Each file or directory passed as an argument or obtained from a method has
       to be consistent with the separator.
-    - The open() and close() method are to initialize and release the resources
-      of the storage driver.
+    - Each method should consider the status of the storage driver based on it's
+      opended or closed.
+
+    For the previous conditions check the decorators:
+
+    - PathSanitizerStorageDriverDecorator
+    - OpenCloseStatusCheckerStorageDriverDecorator
     """
 
     @abstractmethod
@@ -181,7 +188,7 @@ class StorageDriver(ABC, EnforceOverrides):
         be created, the process is finished.
 
         Args:
-            source (string): Content as a byte array.
+            source (bytes): Content as a byte array.
             directory (str): Directory to store the content. Defaults to None.
 
         Returns:
@@ -233,10 +240,26 @@ class StorageDriver(ABC, EnforceOverrides):
             StorageDriverException: If a storage driver exception occurs.
         """
 
-    # pylint: disable=missing-function-docstring
     @abstractmethod
     def put_file(self, source: bytes | str | BufferedReader, directory: str) -> Optional[str]:
-        pass
+        """
+        Stores the `source` into `directory`.
+
+        If `directory` is empty or None, use the root as a directory.
+        If `directory` is a file, the process is finished. Filename is auto-generated.
+        If the parent directory doesn't exist, it'll be created, and if it can't
+        be created, the process is finished.
+
+        Args:
+            source (bytes | str | BufferedReader): Content.
+            directory (str): Directory to store the content. Defaults to None.
+
+        Returns:
+            Optional[str]: Filename or None.
+
+        Raises:
+            StorageDriverException: If a storage driver exception occurs.
+        """
 
     @overload
     def put_file_as(self, source: bytes, file: str) -> bool:
@@ -307,10 +330,28 @@ class StorageDriver(ABC, EnforceOverrides):
             StorageDriverException: If a storage driver exception occurs.
         """
 
-    # pylint: disable=missing-function-docstring
     @abstractmethod
     def put_file_as(self, source: bytes | str | BufferedReader, file: str) -> bool:
-        pass
+        """
+        Stores the `source` into `file`.
+
+        If `source` is None, the process is finished.
+        If `file` is empty, None, or a directory, or the parent folder is a file,
+        the process is finished.
+        If `file` exists, it'll be replaced.
+        If the parent directory doesn't exist, it'll be created, and if it can't
+        be created, the process is finished.
+
+        Args:
+            source (bytes | str | BufferedReader): Content
+            file (str): Full file path.
+
+        Returns:
+            bool: True if the action could be executed, False otherwise.
+
+        Raises:
+            StorageDriverException: If a storage driver exception occurs.
+        """
 
     @abstractmethod
     def append(self, source: bytes, file: str) -> bool:
@@ -374,7 +415,6 @@ class StorageDriver(ABC, EnforceOverrides):
             StorageDriverException: If a storage driver exception occurs.
         """
 
-    # pylint: disable=missing-function-docstring
     @abstractmethod
     def copy(
         self,
@@ -382,7 +422,25 @@ class StorageDriver(ABC, EnforceOverrides):
         target: str,
         target_storage_driver: Optional['StorageDriver'] = None
     ) -> bool:
-        pass
+        """
+        Copies the `source` into `target` using the `target_storage_driver` in the target.
+
+        If `source` doesn't exist or is a directory, return False.
+        If `source` exists and `target` is the same, return False.
+        If `target` is empty or a directory, return False.
+        If `target` already exists, it'll be replaced.
+
+        Args:
+            source (str): Full file path.
+            target (str): Full file path.
+            target_storage_driver (Optional[StorageDriver]): Storage driver to use in the target.
+
+        Returns:
+            bool: True if the action could be executed, False otherwise.
+
+        Raises:
+            StorageDriverException: If a storage driver exception occurs.
+        """
 
     @overload
     def move(self, source: str, target: str) -> bool:
@@ -427,7 +485,6 @@ class StorageDriver(ABC, EnforceOverrides):
             StorageDriverException: If a storage driver exception occurs.
         """
 
-    # pylint: disable=missing-function-docstring
     @abstractmethod
     def move(
         self,
@@ -435,7 +492,25 @@ class StorageDriver(ABC, EnforceOverrides):
         target: str,
         target_storage_driver: Optional['StorageDriver'] = None
     ) -> bool:
-        pass
+        """
+        Moves the `source` to `target` using the `target_storage_driver` in the target.
+
+        If `source` doesn't exist or is a directory, return False.
+        If `source` exists and `target` is the same, return False.
+        If `target` is empty or a directory, return False.
+        If `target` already exists, it'll be replaced.
+
+        Args:
+            source (str): Full file path.
+            target (str): Full file path.
+            target_storage_driver (Optional[StorageDriver]): Storage driver to use in the target.
+
+        Returns:
+            bool: True if the action could be executed, False otherwise.
+
+        Raises:
+            StorageDriverException: If a storage driver exception occurs.
+        """
 
     @abstractmethod
     def delete(self, file: str) -> bool:
@@ -597,9 +672,9 @@ class StorageDriver(ABC, EnforceOverrides):
         Copy the 'source' into 'target' using the 'target_storage_driver' in the target.
 
         Args:
-            target_storage_driver: Storage driver to use in the target.
             source (str): Full directory path.
             target (str): Full directory path.
+            target_storage_driver (StoragaDriver): Storage driver to use in the target.
 
         Returns:
             bool: True if the action could be executed.
@@ -608,7 +683,6 @@ class StorageDriver(ABC, EnforceOverrides):
             StorageDriverException: If there's an issue with the storage driver.
         """
 
-    # pylint: disable=missing-function-docstring
     @abstractmethod
     def copy_directory(
         self,
@@ -616,7 +690,20 @@ class StorageDriver(ABC, EnforceOverrides):
         target: str,
         target_storage_driver: Optional['StorageDriver'] = None
     ) -> bool:
-        pass
+        """
+        Copy the 'source' into 'target' using the 'target_storage_driver' in the target.
+
+        Args:
+            source (str): Full directory path.
+            target (str): Full directory path.
+            target_storage_driver (Optional[StorageDriver]): Storage driver to use in the target.
+
+        Returns:
+            bool: True if the action could be executed.
+
+        Raises:
+            StorageDriverException: If there's an issue with the storage driver.
+        """
 
     @overload
     def move_directory(self, source: str, target: str) -> bool:
@@ -656,7 +743,6 @@ class StorageDriver(ABC, EnforceOverrides):
             StorageDriverException: If there's an issue with the storage driver.
         """
 
-    # pylint: disable=missing-function-docstring
     @abstractmethod
     def move_directory(
         self,
@@ -664,7 +750,20 @@ class StorageDriver(ABC, EnforceOverrides):
         target: str,
         target_storage_driver: Optional['StorageDriver'] = None
     ) -> bool:
-        pass
+        """
+        Move the 'source' into 'target' using the 'target_storage_driver' in the target.
+
+        Args:
+            source (str): Full directory path.
+            target (str): Full directory path.
+            target_storage_driver (Optional[StorageDriver]): Storage driver to use in the target.
+
+        Returns:
+            bool: True if the action could be executed.
+
+        Raises:
+            StorageDriverException: If there's an issue with the storage driver.
+        """
 
     @abstractmethod
     def make_directory(self, directory: str) -> bool:

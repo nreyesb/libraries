@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 # flake8: noqa: E501
 # pylint: disable=missing-function-docstring
-# pylint: disable=line-too-long
 # pylint: disable=empty-docstring
+# pylint: disable=line-too-long
+# pylint: disable=attribute-defined-outside-init
+# pylint: disable=too-many-lines
 """
 Private License - For Internal Use Only
 

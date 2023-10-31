@@ -13,7 +13,7 @@ Module: path_sanitizer_storage_driver_decorator.py
 Author: Toku Dev
 """
 from io import BufferedReader
-from typing import Optional
+from typing import Optional, final
 from overrides import override
 from toku.storage.driver.api import PathSanitizer
 from toku.storage.driver.api import DirectorySeparator
@@ -22,6 +22,7 @@ from toku.storage.driver.api import StorageDriver
 from toku.storage.driver.api import StorageDriverDecorator
 
 
+@final
 class PathSanitizerStorageDriverDecorator(StorageDriverDecorator):
     """
     Provides a decorator to wrap the DirectorySeparator enum and ensure

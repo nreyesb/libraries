@@ -12,11 +12,12 @@ prior written permission from Your Company Name.
 Module: storage_driver_decorator.py
 Author: Toku Dev
 """
+from abc import ABC
 from typing import Final, Type
 from toku.storage.driver.api import StorageDriver
 
 
-class StorageDriverDecorator(StorageDriver):
+class StorageDriverDecorator(StorageDriver, ABC):
     """
     Abstract base class for storage driver decorators.
     """

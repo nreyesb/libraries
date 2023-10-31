@@ -12,7 +12,7 @@ prior written permission from Your Company Name.
 Module: cipher_exception.py
 Author: Toku Dev
 """
-from typing import Optional, Type
+from typing import Optional
 
 
 class CipherException(Exception):
@@ -20,12 +20,10 @@ class CipherException(Exception):
     Represents a Cipher exception.
     """
 
-    def __init__(self, message: Optional[str] = None, cause: Type[Exception] | None = None) -> None:
-        """Initialize the StorageDriverException.
+    def __init__(self, message: Optional[str] = None) -> None:
+        """Initialize the CipherException.
 
         Args:
             message (Optional[str]): A description of the error. Defaults to None.
-            cause (Exception): The exception that caused this error. Defaults to None.
         """
         super().__init__(message)
-        self.cause: type[Exception] | None = cause

@@ -46,7 +46,7 @@ class ShaHasher(Hasher):
                 - sha256
                 - sha512
         """
-        self.sha_type: Type = sha_type
+        self._sha_type: Type = sha_type
 
     @final
     @override
@@ -54,6 +54,6 @@ class ShaHasher(Hasher):
         if not plaintext:
             return ""
 
-        hasher = hashlib.new(self.sha_type)
+        hasher = hashlib.new(self._sha_type)
         hasher.update(plaintext.encode("utf-8"))
         return hasher.hexdigest()

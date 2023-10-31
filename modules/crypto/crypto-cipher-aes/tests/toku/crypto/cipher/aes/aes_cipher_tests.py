@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
+# flake8: noqa: E501
+# pylint: disable=missing-function-docstring
+# pylint: disable=empty-docstring
 # pylint: disable=line-too-long
-# pylint: disable=unsubscriptable-object
-# flake8: noqa F501
+# pylint: disable=attribute-defined-outside-init
+# pylint: disable=too-many-lines
 """
 Private License - For Internal Use Only
 
@@ -31,7 +34,10 @@ class AesCipherTests(CipherTest[AesCipher]):
 
     @override
     def _create_plain_texts(self) -> list[str]:
-        return ["i am a simple plaintext", "i'am a special plaintext áéíóíúäëïöü"]
+        return [
+            "i am a simple plaintext",
+            "i'am a special plaintext áéíóíúäëïöü"
+        ]
 
     @override
     def _create_cipher_vs_plain_texts(self) -> dict[str, str]:

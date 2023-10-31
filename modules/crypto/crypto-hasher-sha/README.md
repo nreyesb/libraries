@@ -1,83 +1,113 @@
 # Hasher SHA
 
-This library aims to provide the implementation to use Hasher SHA.
+This library aims to provide the implementation to use cryptography Hasher SHA.
 
-## Installation
+## Works with
 
-You can install the library as dependency with:
+### As Library
 
-```bash
-# projects without poetry o for the local environment
-
-pip install toku-hasher-sha@{version}
-```
+Projects without poetry o for the local environment:
 
 ```bash
-# projects with poetry
-
-poetry add toku-hasher-sha@{version}
+pip install toku-crypto-hasher-sha@{version}
 ```
+
+Projects with poetry:
 
 ```bash
-# useful to install the dependency in local environment for new version in progress, but remember to run the command in the environment where you need the dependency and just add the dependency manually or change the version number in the pyproject.toml file
-
-poetry run python -m pip install {project_path}/{dist}/{artifact_name}
+poetry add toku-crypto-hasher-sha@{version}
 ```
 
-You can install the library as project with:
+The following command is useful to install the dependency in the poetry virtual environment for new version in progress, that means the library is not available in the remote repository for dowloanding but the code is available to build the dist or the dist is available in the local machine. It's important remember to run the command in the environment where the dependency is required and just add the dependency manually or change the version number in the pyproject.toml file, on that way it's not needed to use editable mode or path dependency in poetry:
 
 ```bash
-# install
-poetry install
-
-# check the integrity
-poetry run mypy .
+poetry run python -m pip install {artifact_path}
 ```
 
-## Configuration
+#### Usage
+
+##### Configuration
 
 The library doesn't require any specific configuration to use it.
 
-## Testing
-
-You can run the tests using:
-
-```bash
-# -v is for verbos
-# --cov is for coverage
-# --cov-fail-under=MIN to set the minimum needed
-
-poetry run pytest -v --cov --cov-fail-under=MIN
-```
-
-TODO: is it required? what do we need here?
-
-For more information about testing and test coverage, please refer to [Testing Guide](docs/testing.md).
-
-## Usage
+##### Example
 
 To use the library, you can import it in your Python code:
 
 ```python
 from toku.crypto.hasher.api import Hasher # if not needed, just remove type hint or put ShaHasher
-from toku.crypto.hasher.sha import ShaHasher
-hasher: Hasher = create_concrete_implementation()
+from toku.crypto.hasher.sha import Sha1Hasher
+from toku.crypto.hasher.sha import Sha256Hasher
+from toku.crypto.hasher.sha import Sha512Hasher
+
+# sha1
+hasher: Hasher = Sha1Hasher()
 hashertext: str = hasher.hash("my_text")
+print(hashertext)
+
+# sha256
+hasher = Sha256Hasher()
+hashertext = hasher.hash("my_text")
+print(hashertext)
+
+# sha512
+hasher: Hasher = Sha1Hasher()
+hashertext: str = hasher.hash("my_text")
+print(hashertext)
 ```
 
-## FAQ or Troubleshooting
+### As Project
 
-TODO: is it required? what do we need here?
+Install with poetry.lock or create it automatically if it doesn't exists:
 
-If you encounter issues or have questions, please refer to our [FAQ](docs/faq.md) for solutions and guidance.
+```bash
+poetry install
+```
 
-## Contributing
+To update the poetry.lock if pyproject.toml is modified or the file is outdated:
 
-TODO: what are the conditions to contribute?
+```bash
+poetry update
+```
+
+To recreate the poetry.lock:
+
+```bash
+poetry lock
+```
+
+Check the integrity of the poetry.lock file with pyproject.toml file:
+
+```bash
+poetry check
+```
+
+Check the integrity of the source code with mypy:
+
+```bash
+poetry run mypy .
+```
+
+Get the environment path after installation, which can be used in an IDE or Code Editor to set the interpreter:
+
+```bash
+poetry env info --path
+```
+
+You can run the tests using:
+
+```bash
+# -v is for verbose output
+# --cov is for coverage
+# --cov-fail-under=MIN to set the minimum needed
+# -n {NUM} to run in differents workers in parallel
+
+poetry run pytest -n 2 -v --cov --cov-fail-under=MIN
+```
 
 ## About
 
-Refers to pyproject.toml for information about:
+Refers to **pyproject.toml** for information about:
 
 - License
 - Authors
@@ -85,10 +115,3 @@ Refers to pyproject.toml for information about:
 - References and Resources
     - Homepage
     - Documentation
-
-## Changelog
-
-TODO: is it required? what do we need here? 
-
-See [CHANGELOG.md](CHANGELOG.md) for details about changes and updates in different versions of the library.
-

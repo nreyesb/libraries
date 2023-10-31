@@ -1,3 +1,6 @@
 [run]
 source =
     toku
+omit =
+    toku/storage/driver/api/abstract_storage_driver.py
+    toku/storage/driver/api/storage_driver.py

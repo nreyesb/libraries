@@ -18,6 +18,7 @@ from io import BufferedReader
 import os
 import platform
 import shutil
+from typing import final
 from overrides import override
 from toku.storage.driver.api import DirectorySeparator
 from toku.storage.driver.api import Size
@@ -26,6 +27,7 @@ from toku.storage.driver.api import AbstractStorageDriver
 from toku.storage.driver.api import StorageDriverException
 
 
+@final
 class LocalStorageDriver(AbstractStorageDriver):
     """
     Provides the storage driver to work locally, it's necessary that the running
@@ -42,7 +44,8 @@ class LocalStorageDriver(AbstractStorageDriver):
 
         Args:
             root (str): The working directory.
-            separator (DirectorySeparator): The directory separator. Defaults to DirectorySeparator.SLASH.
+            separator (DirectorySeparator): The directory separator.
+                                            Defaults to DirectorySeparator.SLASH.
         """
         super().__init__(root, separator)
 
@@ -58,7 +61,7 @@ class LocalStorageDriver(AbstractStorageDriver):
         pass
 
     @override
-    def _get_as_input_stream_internal(self, file: str) -> BufferedReader:
+    def _get_as_input_stream(self, file: str) -> BufferedReader:
         return open(self._get_path(file), "rb")
 
     @override
@@ -66,29 +69,29 @@ class LocalStorageDriver(AbstractStorageDriver):
         return os.path.isfile(self._get_path(file))
 
     @override
-    def _put_file_as_internal(self, source: BufferedReader, file: str) -> bool:
+    def _put_file_as(self, source: BufferedReader, file: str) -> bool:
         with open(self._get_path(file), "wb") as target:
             shutil.copyfileobj(source, target)
             return True
 
     @override
-    def _append_internal(self, source: bytes, file: str) -> bool:
+    def _append(self, source: bytes, file: str) -> bool:
         with open(self._get_path(file), "ab") as target:
             target.write(source)
             return True
 
     @override
-    def _delete_internal(self, file: str) -> bool:
+    def _delete(self, file: str) -> bool:
         os.remove(self._get_path(file))
         return True
 
     @override
-    def _rename_internal(self, source: str, target: str) -> bool:
+    def _rename(self, source: str, target: str) -> bool:
         os.rename(self._get_path(source), self._get_path(target))
         return True
 
     @override
-    def _files_internal(self, directory: str) -> list[str]:
+    def _files(self, directory: str) -> list[str]:
         directory_path: str = self._get_path(directory)
         return [
             self._sanitizer.sanitize(file_path.replace(self._root, ""), True)
@@ -97,7 +100,7 @@ class LocalStorageDriver(AbstractStorageDriver):
         ]
 
     @override
-    def _all_files_internal(self, directory: str) -> list[str]:
+    def _all_files(self, directory: str) -> list[str]:
         directory_path: str = self._get_path(directory)
         return [
             self._sanitizer.sanitize(file_path.replace(self._root, ""), True)
@@ -106,7 +109,7 @@ class LocalStorageDriver(AbstractStorageDriver):
         ]
 
     @override
-    def _directories_internal(self, directory: str) -> list[str]:
+    def _directories(self, directory: str) -> list[str]:
         directory_path: str = self._get_path(directory)
         return [
             self._sanitizer.sanitize(file_path.replace(self._root, ""), True)
@@ -115,7 +118,7 @@ class LocalStorageDriver(AbstractStorageDriver):
         ]
 
     @override
-    def _all_directories_internal(self, directory: str) -> list[str]:
+    def _all_directories(self, directory: str) -> list[str]:
         directory_path: str = self._get_path(directory)
         return [
             self._sanitizer.sanitize(file_path.replace(self._root, ""), True)
@@ -128,18 +131,18 @@ class LocalStorageDriver(AbstractStorageDriver):
         return os.path.isdir(self._get_path(directory))
 
     @override
-    def _make_directory_internal(self, directory: str) -> bool:
+    def _make_directory(self, directory: str) -> bool:
         os.makedirs(self._get_path(directory), exist_ok=True)
         return True
 
     @override
-    def _delete_directory_internal(self, directory: str) -> bool:
+    def _delete_directory(self, directory: str) -> bool:
         shutil.rmtree(self._get_path(directory), ignore_errors=True)
         return True
 
     @override
-    def _rename_directory_internal(self, source: str, target: str) -> bool:
-        return self._rename_internal(source, target)
+    def _rename_directory(self, source: str, target: str) -> bool:
+        return self._rename(source, target)
 
     @override
     def _get_metadata_from_file(self, file: str) -> Metadata:
@@ -164,7 +167,7 @@ class LocalStorageDriver(AbstractStorageDriver):
     def _get_metadata_from_directory(self, directory: str) -> Metadata:
         directory_path: str = self._get_path(directory)
         files_metadata: list[Metadata] = [
-            self._get_metadata_from_file(f) for f in self._all_files_internal(directory)
+            self._get_metadata_from_file(f) for f in self._all_files(directory)
         ]
         os_stat = os.stat(directory_path)
         return Metadata(

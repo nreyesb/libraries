@@ -19,12 +19,15 @@ Module: local_storage_driver_tests.py
 Author: Toku Dev
 """
 import os
+from typing import final
 import uuid
 from overrides import override
 import pytest
 from tests.toku.storage.driver.api import AbstractStorageDriverTest
 from toku.storage.driver.local import LocalStorageDriver
 
+
+@final
 class LocalStorageDriverTests(AbstractStorageDriverTest[LocalStorageDriver]):
     """
     Provides the local storage driver tests.
@@ -32,8 +35,8 @@ class LocalStorageDriverTests(AbstractStorageDriverTest[LocalStorageDriver]):
 
     @override
     def initialize_test(self) -> None:
-        self.working_directory_primary_storage_driver: str = self._create_working_directory()
-        self.working_directory_secondary_storage_driver: str = self._create_working_directory()
+        self._working_directory_primary_storage_driver: str = self._create_working_directory()
+        self._working_directory_secondary_storage_driver: str = self._create_working_directory()
 
     @override
     def teardown_test(self) -> None:
@@ -41,21 +44,21 @@ class LocalStorageDriverTests(AbstractStorageDriverTest[LocalStorageDriver]):
 
     @override
     def _create_storage_driver(self) -> LocalStorageDriver:
-        return LocalStorageDriver(self.working_directory_primary_storage_driver)
+        return LocalStorageDriver(self._working_directory_primary_storage_driver)
 
     @override
     def _create_storage_driver_secondary(self) -> LocalStorageDriver:
-        return LocalStorageDriver(self.working_directory_secondary_storage_driver)
+        return LocalStorageDriver(self._working_directory_secondary_storage_driver)
 
     def _create_working_directory(self) -> str:
-        temp_dir: str = os.path.join(self.tempdir.name, str(uuid.uuid4()))
+        temp_dir: str = os.path.join(self._tempdir.name, str(uuid.uuid4()))
         os.mkdir(temp_dir)
         return temp_dir
 
     @override
     def test_open__successful_driver_initialization__then_return_void(self) -> None:
-        assert os.path.exists(self.tempdir.name)
-        storage_driver = LocalStorageDriver(self.tempdir.name)
+        assert os.path.exists(self._tempdir.name)
+        storage_driver = LocalStorageDriver(self._tempdir.name)
         storage_driver.open()
 
     @override
@@ -69,8 +72,8 @@ class LocalStorageDriverTests(AbstractStorageDriverTest[LocalStorageDriver]):
 
     @override
     def test_close__successful_driver_completion__then_return_void(self) -> None:
-        assert os.path.exists(self.tempdir.name)
-        storage_driver = LocalStorageDriver(self.tempdir.name)
+        assert os.path.exists(self._tempdir.name)
+        storage_driver = LocalStorageDriver(self._tempdir.name)
         storage_driver.open()
         storage_driver.close()
 

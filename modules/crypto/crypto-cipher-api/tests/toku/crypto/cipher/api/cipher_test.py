@@ -1,5 +1,10 @@
 # -*- coding: utf-8 -*-
 # flake8: noqa: E501
+# pylint: disable=missing-function-docstring
+# pylint: disable=empty-docstring
+# pylint: disable=line-too-long
+# pylint: disable=attribute-defined-outside-init
+# pylint: disable=too-many-lines
 """
 Private License - For Internal Use Only
 
@@ -14,7 +19,7 @@ Module: cipher_test.py
 Author: Toku Dev
 """
 from abc import ABC, abstractmethod
-from typing import final, TypeVar, Generic
+from typing import Generator, final, TypeVar, Generic
 from overrides import EnforceOverrides
 import pytest
 from toku.crypto.cipher.api import Cipher
@@ -27,14 +32,21 @@ class CipherTest(ABC, EnforceOverrides, Generic[T]):
     Provides test cases for any kind Cipher class.
     """
 
-    @pytest.fixture
-    def cipher(self) -> T:
+    @pytest.fixture(autouse=True)
+    def setup_test(self) -> Generator[None, None, None]:
         """
-        Fixture to return an instance of the Cipher class for testing.
+        Create an instance of the Cipher class for testing.
+
+        Return the control to the test.
+
+        Yields:
+            Generator[None, None, None]: _description_
         """
-        cipher: T = self._create_cipher()
-        assert cipher
-        return cipher
+        # setup
+        self._cipher: T = self._create_cipher()
+
+        # return control to the tests
+        yield
 
     @pytest.fixture
     def plain_texts(self) -> list[str]:
@@ -55,37 +67,40 @@ class CipherTest(ABC, EnforceOverrides, Generic[T]):
         return values
 
     @final
-    def test_encrypt__with_none_text__then_return_empty_string(self, cipher: T) -> None:
+    def test_encrypt__with_none_text__then_return_empty_string(self) -> None:
         """
         Verifies encryption case for none text.
 
         Args:
             cipher (T): An instance of the Cipher class for testing.
         """
-        assert cipher.encrypt(None) == ""
+        assert self._cipher.encrypt(None) == ""
 
     @final
-    def test_encrypt__with_empty_text__then_return_empty_string(self, cipher: T) -> None:
+    def test_encrypt__with_empty_text__then_return_empty_string(self) -> None:
         """
         Verifies encryption case for empty text.
 
         Args:
             cipher (T): An instance of the Cipher class for testing.
         """
-        assert cipher.encrypt("") == ""
+        assert self._cipher.encrypt("") == ""
 
     @final
-    def test_encrypt__with_blank_text__then_return_no_empty_string(self, cipher: T) -> None:
+    def test_encrypt__with_blank_text__then_return_no_empty_string(self) -> None:
         """
         Verifies encryption case for blank text.
 
         Args:
             cipher (T): An instance of the Cipher class for testing.
         """
-        assert cipher.encrypt(" ") != ""
+        assert self._cipher.encrypt(" ") != ""
 
     @final
-    def test_encrypt__with_reported_text__then_return_encrypted_string(self, cipher: T, plain_texts: list[str]) -> None:
+    def test_encrypt__with_reported_text__then_return_encrypted_string(
+        self,
+        plain_texts: list[str]
+    ) -> None:
         """
         Verifies encryption case for not none and not empty text.
 
@@ -97,34 +112,35 @@ class CipherTest(ABC, EnforceOverrides, Generic[T]):
             plain_texts (list[str]): Plain texts for testing
         """
         for plaintext in plain_texts:
-            ciphertext: str = cipher.encrypt(plaintext)
+            ciphertext: str = self._cipher.encrypt(plaintext)
             assert ciphertext
             assert ciphertext != plaintext
-            assert cipher.decrypt(ciphertext) == plaintext
+            assert self._cipher.decrypt(ciphertext) == plaintext
 
     @final
-    def test_decrypt__with_none_text__then_return_empty_string(self, cipher: T) -> None:
+    def test_decrypt__with_none_text__then_return_empty_string(self) -> None:
         """
         Verifies decryption case for none text.
 
         Args:
             cipher (T): An instance of the Cipher class for testing.
         """
-        assert cipher.decrypt(None) == ""
+        assert self._cipher.decrypt(None) == ""
 
     @final
-    def test_decrypt__with_empty_text__then_return_empty_string(self, cipher: T) -> None:
+    def test_decrypt__with_empty_text__then_return_empty_string(self) -> None:
         """
         Verifies decryption case for empty text.
 
         Args:
             cipher (T): An instance of the Cipher class for testing.
         """
-        assert cipher.decrypt("") == ""
+        assert self._cipher.decrypt("") == ""
 
     @final
     def test_decrypt__with_reported_text__then_return_decrypted_string(
-        self, cipher: T, cipher_vs_plain_texts: dict[str, str]
+        self,
+        cipher_vs_plain_texts: dict[str, str]
     ) -> None:
         """
         Verifies decryption case for not none and not empty text.
@@ -136,7 +152,7 @@ class CipherTest(ABC, EnforceOverrides, Generic[T]):
             cipher_vs_plain_texts (dict[str, str]): Cipher and plain texts for testing
         """
         for ciphertext, plaintext in cipher_vs_plain_texts.items():
-            assert cipher.decrypt(ciphertext) == plaintext
+            assert self._cipher.decrypt(ciphertext) == plaintext
 
     @abstractmethod
     def _create_cipher(self) -> T:

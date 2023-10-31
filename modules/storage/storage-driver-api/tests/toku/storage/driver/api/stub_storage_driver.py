@@ -31,7 +31,7 @@ class StubStorageDriver(StorageDriver):
             separator (DirectorySeparator): The directory separator.
                                             Defaults to DirectorySeparator.SLASH.
         """
-        self.separator: DirectorySeparator = separator
+        self._separator: DirectorySeparator = separator
 
     @override
     def close(self) -> None:
@@ -151,4 +151,4 @@ class StubStorageDriver(StorageDriver):
 
     @override
     def get_separator(self) -> DirectorySeparator:
-        return self.separator
+        return self._separator

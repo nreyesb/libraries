@@ -14,7 +14,7 @@ Author: Toku Dev
 """
 from abc import ABC, abstractmethod
 from io import BufferedReader
-from typing import Optional
+from typing import Optional, final
 from overrides import override
 from toku.storage.driver.api import Status
 from toku.storage.driver.api import Metadata
@@ -110,6 +110,7 @@ class ClosedStatusHandler(StatusHandler):
         return Status.CLOSED.name
 
 
+@final
 class OpenCloseStatusCheckerStorageDriverDecorator(StorageDriverDecorator):
     """
     Provides a decorator to wrap the Status enum and ensure that each

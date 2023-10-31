@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 # flake8: noqa: E501
 # pylint: disable=missing-function-docstring
+# pylint: disable=empty-docstring
 # pylint: disable=line-too-long
 # pylint: disable=attribute-defined-outside-init
+# pylint: disable=too-many-lines
 """
 Private License - For Internal Use Only
 
@@ -68,10 +70,10 @@ class PathSanitizerTests:
         Args:
             request (FixtureRequest): The tuple with the expected and original directory separators
         """
-        self.separator_sanitized: DirectorySeparator
-        self.separator_to_sanitize: DirectorySeparator
-        self.separator_sanitized, self.separator_to_sanitize = request.param
-        self.sanitizer: PathSanitizer = PathSanitizer(self.separator_sanitized)
+        self._separator_sanitized: DirectorySeparator
+        self._separator_to_sanitize: DirectorySeparator
+        self._separator_sanitized, self._separator_to_sanitize = request.param
+        self._sanitizer: PathSanitizer = PathSanitizer(self._separator_sanitized)
 
     def create_path_to_sanitize(self, *values: str) -> str:
         """
@@ -81,7 +83,7 @@ class PathSanitizerTests:
         Returns:
             str: The path to sanitize
         """
-        separator: str = self.separator_to_sanitize.value
+        separator: str = self._separator_to_sanitize.value
         value: str = separator.join(values)
         print(f"path_to_sanitize: {value}")
         return value
@@ -94,7 +96,7 @@ class PathSanitizerTests:
         Returns:
             str: The path sanitized
         """
-        separator: str = self.separator_sanitized.value
+        separator: str = self._separator_sanitized.value
         value: str = separator.join(values)
         print(f"path_sanitized: {value}")
         return value
@@ -102,190 +104,190 @@ class PathSanitizerTests:
     def test_sanitize__explicit_false_and_dont_remove_start_directory_separator_and_path_is_null__then_return_string_empty(
         self
     ) -> None:
-        assert self.sanitizer.sanitize(None, False) == ""
+        assert self._sanitizer.sanitize(None, False) == ""
 
     def test_sanitize__explicit_false_and_dont_remove_start_directory_separator_and_path_is_empty__then_return_string_empty(
         self
     ) -> None:
-        assert self.sanitizer.sanitize("", False) == ""
-        assert self.sanitizer.sanitize(" ", False) == ""
+        assert self._sanitizer.sanitize("", False) == ""
+        assert self._sanitizer.sanitize(" ", False) == ""
 
     def test_sanitize__explicit_false_and_dont_remove_start_directory_separator_and_path_is_reported__then_return_string(
         self
     ) -> None:
-        assert self.sanitizer.sanitize(self.create_path_to_sanitize(""), False) == ""
-        assert self.sanitizer.sanitize(self.create_path_to_sanitize("", ""), False) == ""
-        assert self.sanitizer.sanitize("1", False) == "1"
-        assert self.sanitizer.sanitize(self.create_path_to_sanitize("1", ""), False) == "1"
-        assert self.sanitizer.sanitize(self.create_path_to_sanitize("", "1", ""), False) == self.create_path_sanitized("", "1")
-        assert self.sanitizer.sanitize(self.create_path_to_sanitize("1", "2"), False) == self.create_path_sanitized("1", "2")
-        assert self.sanitizer.sanitize(self.create_path_to_sanitize("1", "2", ""), False) == self.create_path_sanitized("1", "2")
-        assert self.sanitizer.sanitize(self.create_path_to_sanitize("", "1", "2", ""), False) == self.create_path_sanitized("", "1", "2")
-        assert self.sanitizer.sanitize(self.create_path_to_sanitize("1", "2"), False) == self.create_path_sanitized("1", "2")
-        assert self.sanitizer.sanitize(self.create_path_to_sanitize("1", "2", ""), False) == self.create_path_sanitized("1", "2")
-        assert self.sanitizer.sanitize(self.create_path_to_sanitize("", "1", "2", ""), False) == self.create_path_sanitized("", "1", "2")
+        assert self._sanitizer.sanitize(self.create_path_to_sanitize(""), False) == ""
+        assert self._sanitizer.sanitize(self.create_path_to_sanitize("", ""), False) == ""
+        assert self._sanitizer.sanitize("1", False) == "1"
+        assert self._sanitizer.sanitize(self.create_path_to_sanitize("1", ""), False) == "1"
+        assert self._sanitizer.sanitize(self.create_path_to_sanitize("", "1", ""), False) == self.create_path_sanitized("", "1")
+        assert self._sanitizer.sanitize(self.create_path_to_sanitize("1", "2"), False) == self.create_path_sanitized("1", "2")
+        assert self._sanitizer.sanitize(self.create_path_to_sanitize("1", "2", ""), False) == self.create_path_sanitized("1", "2")
+        assert self._sanitizer.sanitize(self.create_path_to_sanitize("", "1", "2", ""), False) == self.create_path_sanitized("", "1", "2")
+        assert self._sanitizer.sanitize(self.create_path_to_sanitize("1", "2"), False) == self.create_path_sanitized("1", "2")
+        assert self._sanitizer.sanitize(self.create_path_to_sanitize("1", "2", ""), False) == self.create_path_sanitized("1", "2")
+        assert self._sanitizer.sanitize(self.create_path_to_sanitize("", "1", "2", ""), False) == self.create_path_sanitized("", "1", "2")
 
     def test_sanitize__implicit_false_and_dont_remove_start_directory_separator_and_path_is_null__then_return_string_empty(
         self
     ) -> None:
-        assert self.sanitizer.sanitize(None) == ""
+        assert self._sanitizer.sanitize(None) == ""
 
     def test_sanitize__implicit_false_and_dont_remove_start_directory_separator_and_path_is_empty__then_return_string_empty(
         self
     ) -> None:
-        assert self.sanitizer.sanitize("") == ""
-        assert self.sanitizer.sanitize(" ") == ""
+        assert self._sanitizer.sanitize("") == ""
+        assert self._sanitizer.sanitize(" ") == ""
 
     def test_sanitize__implicit_false_and_dont_remove_start_directory_separator_and_path_is_reported__then_return_string(
         self
     ) -> None:
-        assert self.sanitizer.sanitize(self.create_path_to_sanitize("")) == ""
-        assert self.sanitizer.sanitize(self.create_path_to_sanitize("", "")) == ""
-        assert self.sanitizer.sanitize("1") == "1"
-        assert self.sanitizer.sanitize(self.create_path_to_sanitize("1", "")) == "1"
-        assert self.sanitizer.sanitize(self.create_path_to_sanitize("", "1", "")) == self.create_path_sanitized("", "1")
-        assert self.sanitizer.sanitize(self.create_path_to_sanitize("1", "2")) == self.create_path_sanitized("1", "2")
-        assert self.sanitizer.sanitize(self.create_path_to_sanitize("1", "2", "")) == self.create_path_sanitized("1", "2")
-        assert self.sanitizer.sanitize(self.create_path_to_sanitize("", "1", "2", "")) == self.create_path_sanitized("", "1", "2")
-        assert self.sanitizer.sanitize(self.create_path_to_sanitize("1", "2")) == self.create_path_sanitized("1", "2")
-        assert self.sanitizer.sanitize(self.create_path_to_sanitize("1", "2", "")) == self.create_path_sanitized("1", "2")
-        assert self.sanitizer.sanitize(self.create_path_to_sanitize("", "1", "2", "")) == self.create_path_sanitized("", "1", "2")
+        assert self._sanitizer.sanitize(self.create_path_to_sanitize("")) == ""
+        assert self._sanitizer.sanitize(self.create_path_to_sanitize("", "")) == ""
+        assert self._sanitizer.sanitize("1") == "1"
+        assert self._sanitizer.sanitize(self.create_path_to_sanitize("1", "")) == "1"
+        assert self._sanitizer.sanitize(self.create_path_to_sanitize("", "1", "")) == self.create_path_sanitized("", "1")
+        assert self._sanitizer.sanitize(self.create_path_to_sanitize("1", "2")) == self.create_path_sanitized("1", "2")
+        assert self._sanitizer.sanitize(self.create_path_to_sanitize("1", "2", "")) == self.create_path_sanitized("1", "2")
+        assert self._sanitizer.sanitize(self.create_path_to_sanitize("", "1", "2", "")) == self.create_path_sanitized("", "1", "2")
+        assert self._sanitizer.sanitize(self.create_path_to_sanitize("1", "2")) == self.create_path_sanitized("1", "2")
+        assert self._sanitizer.sanitize(self.create_path_to_sanitize("1", "2", "")) == self.create_path_sanitized("1", "2")
+        assert self._sanitizer.sanitize(self.create_path_to_sanitize("", "1", "2", "")) == self.create_path_sanitized("", "1", "2")
 
     def test_sanitize__remove_start_directory_separator_and_path_is_null__then_return_string_empty(
         self
     ) -> None:
-        assert self.sanitizer.sanitize(None, True) == ""
+        assert self._sanitizer.sanitize(None, True) == ""
 
     def test_sanitize__remove_start_directory_separator_and_path_is_empty__then_return_string_empty(
         self
     ) -> None:
-        assert self.sanitizer.sanitize("", True) == ""
-        assert self.sanitizer.sanitize(" ", True) == ""
+        assert self._sanitizer.sanitize("", True) == ""
+        assert self._sanitizer.sanitize(" ", True) == ""
 
     def test_sanitize__remove_start_directory_separator_and_path_is_reported__then_return_string(
         self
     ) -> None:
-        assert self.sanitizer.sanitize(self.create_path_to_sanitize(""), True) == ""
-        assert self.sanitizer.sanitize(self.create_path_to_sanitize("", ""), True) == ""
-        assert self.sanitizer.sanitize("1", True) == "1"
-        assert self.sanitizer.sanitize(self.create_path_to_sanitize("1", ""), True) == "1"
-        assert self.sanitizer.sanitize(self.create_path_to_sanitize("", "1", ""), True) == "1"
-        assert self.sanitizer.sanitize(self.create_path_to_sanitize("1", "2"), True) == self.create_path_sanitized("1", "2")
-        assert self.sanitizer.sanitize(self.create_path_to_sanitize("1", "2", ""), True) == self.create_path_sanitized("1", "2")
-        assert self.sanitizer.sanitize(self.create_path_to_sanitize("", "1", "2", ""), True) == self.create_path_sanitized("1", "2")
-        assert self.sanitizer.sanitize(self.create_path_to_sanitize("1", "2"), True) == self.create_path_sanitized("1", "2")
-        assert self.sanitizer.sanitize(self.create_path_to_sanitize("1", "2", ""), True) == self.create_path_sanitized("1", "2")
-        assert self.sanitizer.sanitize(self.create_path_to_sanitize("", "1", "2", ""), True) == self.create_path_sanitized("1", "2")
+        assert self._sanitizer.sanitize(self.create_path_to_sanitize(""), True) == ""
+        assert self._sanitizer.sanitize(self.create_path_to_sanitize("", ""), True) == ""
+        assert self._sanitizer.sanitize("1", True) == "1"
+        assert self._sanitizer.sanitize(self.create_path_to_sanitize("1", ""), True) == "1"
+        assert self._sanitizer.sanitize(self.create_path_to_sanitize("", "1", ""), True) == "1"
+        assert self._sanitizer.sanitize(self.create_path_to_sanitize("1", "2"), True) == self.create_path_sanitized("1", "2")
+        assert self._sanitizer.sanitize(self.create_path_to_sanitize("1", "2", ""), True) == self.create_path_sanitized("1", "2")
+        assert self._sanitizer.sanitize(self.create_path_to_sanitize("", "1", "2", ""), True) == self.create_path_sanitized("1", "2")
+        assert self._sanitizer.sanitize(self.create_path_to_sanitize("1", "2"), True) == self.create_path_sanitized("1", "2")
+        assert self._sanitizer.sanitize(self.create_path_to_sanitize("1", "2", ""), True) == self.create_path_sanitized("1", "2")
+        assert self._sanitizer.sanitize(self.create_path_to_sanitize("", "1", "2", ""), True) == self.create_path_sanitized("1", "2")
 
     def test_concat__arguments_is_null__then_return_string_empty(
         self
     ) -> None:
-        assert self.sanitizer.concat(None) == ""
+        assert self._sanitizer.concat(None) == ""
 
     def test_concat__arguments_is_empty__then_return_string_empty(
         self
     ) -> None:
-        assert self.sanitizer.concat("") == ""
-        assert self.sanitizer.concat(" ") == ""
+        assert self._sanitizer.concat("") == ""
+        assert self._sanitizer.concat(" ") == ""
 
     def test_concat__arguments_has_null_and_empty__then_return_string_empty(
         self
     ) -> None:
-        assert self.sanitizer.concat(None, "") == ""
-        assert self.sanitizer.concat(None, " ") == ""
-        assert self.sanitizer.concat("", None) == ""
-        assert self.sanitizer.concat("", " ") == ""
-        assert self.sanitizer.concat(" ", None) == ""
-        assert self.sanitizer.concat(" ", "") == ""
-        assert self.sanitizer.concat("", " ", None) == ""
+        assert self._sanitizer.concat(None, "") == ""
+        assert self._sanitizer.concat(None, " ") == ""
+        assert self._sanitizer.concat("", None) == ""
+        assert self._sanitizer.concat("", " ") == ""
+        assert self._sanitizer.concat(" ", None) == ""
+        assert self._sanitizer.concat(" ", "") == ""
+        assert self._sanitizer.concat("", " ", None) == ""
 
     def test_concat__arguments_is_reported__then_return_string(
         self
     ) -> None:
-        assert self.sanitizer.concat("1") == "1"
-        assert self.sanitizer.concat("1", "") == "1"
-        assert self.sanitizer.concat("", "1") == self.create_path_sanitized("", "1")
-        assert self.sanitizer.concat("", "1", "") == self.create_path_sanitized("", "1")
-        assert self.sanitizer.concat("1", None) == "1"
-        assert self.sanitizer.concat("", "1", "") == self.create_path_sanitized("", "1")
-        assert self.sanitizer.concat("", "1", None) == self.create_path_sanitized("", "1")
-        assert self.sanitizer.concat("1", "2") == self.create_path_sanitized("1", "2")
-        assert self.sanitizer.concat("1", "2", "") == self.create_path_sanitized("1", "2")
-        assert self.sanitizer.concat("", "1", "2") == self.create_path_sanitized("", "1", "2")
-        assert self.sanitizer.concat("", "1", "2", "") == self.create_path_sanitized("", "1", "2")
-        assert self.sanitizer.concat(self.create_path_to_sanitize("1", ""), self.create_path_to_sanitize("2", "")) == self.create_path_sanitized("1", "2")
-        assert self.sanitizer.concat(self.create_path_to_sanitize("1", ""), self.create_path_to_sanitize("2", ""), "") == self.create_path_sanitized("1", "2")
-        assert self.sanitizer.concat("", self.create_path_to_sanitize("1", ""), self.create_path_to_sanitize("2", "")) == self.create_path_sanitized("", "1", "2")
-        assert self.sanitizer.concat("", self.create_path_to_sanitize("1", ""), self.create_path_to_sanitize("2", ""), "") == self.create_path_sanitized("", "1", "2")
+        assert self._sanitizer.concat("1") == "1"
+        assert self._sanitizer.concat("1", "") == "1"
+        assert self._sanitizer.concat("", "1") == self.create_path_sanitized("", "1")
+        assert self._sanitizer.concat("", "1", "") == self.create_path_sanitized("", "1")
+        assert self._sanitizer.concat("1", None) == "1"
+        assert self._sanitizer.concat("", "1", "") == self.create_path_sanitized("", "1")
+        assert self._sanitizer.concat("", "1", None) == self.create_path_sanitized("", "1")
+        assert self._sanitizer.concat("1", "2") == self.create_path_sanitized("1", "2")
+        assert self._sanitizer.concat("1", "2", "") == self.create_path_sanitized("1", "2")
+        assert self._sanitizer.concat("", "1", "2") == self.create_path_sanitized("", "1", "2")
+        assert self._sanitizer.concat("", "1", "2", "") == self.create_path_sanitized("", "1", "2")
+        assert self._sanitizer.concat(self.create_path_to_sanitize("1", ""), self.create_path_to_sanitize("2", "")) == self.create_path_sanitized("1", "2")
+        assert self._sanitizer.concat(self.create_path_to_sanitize("1", ""), self.create_path_to_sanitize("2", ""), "") == self.create_path_sanitized("1", "2")
+        assert self._sanitizer.concat("", self.create_path_to_sanitize("1", ""), self.create_path_to_sanitize("2", "")) == self.create_path_sanitized("", "1", "2")
+        assert self._sanitizer.concat("", self.create_path_to_sanitize("1", ""), self.create_path_to_sanitize("2", ""), "") == self.create_path_sanitized("", "1", "2")
 
     def test_get_parent__path_is_null__then_return_string_empty(
         self
     ) -> None:
-        assert self.sanitizer.get_parent(None) == ""
+        assert self._sanitizer.get_parent(None) == ""
 
     def test_get_parent__path_is_empty__then_return_string_empty(
         self
     ) -> None:
-        assert self.sanitizer.get_parent("") == ""
-        assert self.sanitizer.get_parent(" ") == ""
+        assert self._sanitizer.get_parent("") == ""
+        assert self._sanitizer.get_parent(" ") == ""
 
     def test_get_parent__path_is_reported__then_return_string(
         self
     ) -> None:
-        assert self.sanitizer.get_parent(self.separator_sanitized.value) == ""
-        assert self.sanitizer.get_parent("1") == ""
-        assert self.sanitizer.get_parent(PathSanitizerTests.FILE_NAME_TO_TEST) == ""
-        assert self.sanitizer.get_parent(self.create_path_to_sanitize("1", "")) == ""
-        assert self.sanitizer.get_parent(self.create_path_to_sanitize("1", "")) == ""
-        assert self.sanitizer.get_parent(self.create_path_to_sanitize("1", "2")) == "1"
-        assert self.sanitizer.get_parent(self.create_path_to_sanitize("1", PathSanitizerTests.FILE_NAME_TO_TEST)) == "1"
-        assert self.sanitizer.get_parent(self.create_path_to_sanitize("1", "2", "")) == self.create_path_sanitized("1")
-        assert self.sanitizer.get_parent(self.create_path_to_sanitize("1", "2", "")) == self.create_path_sanitized("1")
-        assert self.sanitizer.get_parent(self.create_path_to_sanitize("1", "2", "3")) == self.create_path_sanitized("1", "2")
-        assert self.sanitizer.get_parent(self.create_path_to_sanitize("1", "2", PathSanitizerTests.FILE_NAME_TO_TEST)) == self.create_path_sanitized("1", "2")
-        assert self.sanitizer.get_parent(self.create_path_to_sanitize("1", "2", "3", "")) == self.create_path_sanitized("1", "2")
+        assert self._sanitizer.get_parent(self._separator_sanitized.value) == ""
+        assert self._sanitizer.get_parent("1") == ""
+        assert self._sanitizer.get_parent(PathSanitizerTests.FILE_NAME_TO_TEST) == ""
+        assert self._sanitizer.get_parent(self.create_path_to_sanitize("1", "")) == ""
+        assert self._sanitizer.get_parent(self.create_path_to_sanitize("1", "")) == ""
+        assert self._sanitizer.get_parent(self.create_path_to_sanitize("1", "2")) == "1"
+        assert self._sanitizer.get_parent(self.create_path_to_sanitize("1", PathSanitizerTests.FILE_NAME_TO_TEST)) == "1"
+        assert self._sanitizer.get_parent(self.create_path_to_sanitize("1", "2", "")) == self.create_path_sanitized("1")
+        assert self._sanitizer.get_parent(self.create_path_to_sanitize("1", "2", "")) == self.create_path_sanitized("1")
+        assert self._sanitizer.get_parent(self.create_path_to_sanitize("1", "2", "3")) == self.create_path_sanitized("1", "2")
+        assert self._sanitizer.get_parent(self.create_path_to_sanitize("1", "2", PathSanitizerTests.FILE_NAME_TO_TEST)) == self.create_path_sanitized("1", "2")
+        assert self._sanitizer.get_parent(self.create_path_to_sanitize("1", "2", "3", "")) == self.create_path_sanitized("1", "2")
 
     def test_get_ame__path_is_null__then_return_string_empty(
         self
     ) -> None:
-        assert self.sanitizer.get_name(None) == ""
+        assert self._sanitizer.get_name(None) == ""
 
     def test_get_name__path_is_empty__then_return_string_empty(
         self
     ) -> None:
-        assert self.sanitizer.get_name("") == ""
-        assert self.sanitizer.get_name(" ") == ""
+        assert self._sanitizer.get_name("") == ""
+        assert self._sanitizer.get_name(" ") == ""
 
     def test_get_name__path_is_reported__then_return_string(
         self
     ) -> None:
-        assert self.sanitizer.get_name(self.create_path_to_sanitize(PathSanitizerTests.FILE_NAME_TO_TEST)) == PathSanitizerTests.FILE_NAME_TO_TEST
-        assert self.sanitizer.get_name(self.create_path_to_sanitize("1", PathSanitizerTests.FILE_NAME_TO_TEST)) == PathSanitizerTests.FILE_NAME_TO_TEST
-        assert self.sanitizer.get_name(self.create_path_to_sanitize("1", "2", PathSanitizerTests.FILE_NAME_TO_TEST)) == PathSanitizerTests.FILE_NAME_TO_TEST
-        assert self.sanitizer.get_name(self.create_path_to_sanitize("1")) == "1"
-        assert self.sanitizer.get_name(self.create_path_to_sanitize("1", "2")) == "2"
-        assert self.sanitizer.get_name(self.create_path_to_sanitize("1", "2", "3")) == "3"
-        assert self.sanitizer.get_name(self.create_path_to_sanitize("1", "")) == "1"
-        assert self.sanitizer.get_name(self.create_path_to_sanitize("1", "2", "")) == "2"
-        assert self.sanitizer.get_name(self.create_path_to_sanitize("1", "2", "3", "")) == "3"
+        assert self._sanitizer.get_name(self.create_path_to_sanitize(PathSanitizerTests.FILE_NAME_TO_TEST)) == PathSanitizerTests.FILE_NAME_TO_TEST
+        assert self._sanitizer.get_name(self.create_path_to_sanitize("1", PathSanitizerTests.FILE_NAME_TO_TEST)) == PathSanitizerTests.FILE_NAME_TO_TEST
+        assert self._sanitizer.get_name(self.create_path_to_sanitize("1", "2", PathSanitizerTests.FILE_NAME_TO_TEST)) == PathSanitizerTests.FILE_NAME_TO_TEST
+        assert self._sanitizer.get_name(self.create_path_to_sanitize("1")) == "1"
+        assert self._sanitizer.get_name(self.create_path_to_sanitize("1", "2")) == "2"
+        assert self._sanitizer.get_name(self.create_path_to_sanitize("1", "2", "3")) == "3"
+        assert self._sanitizer.get_name(self.create_path_to_sanitize("1", "")) == "1"
+        assert self._sanitizer.get_name(self.create_path_to_sanitize("1", "2", "")) == "2"
+        assert self._sanitizer.get_name(self.create_path_to_sanitize("1", "2", "3", "")) == "3"
 
     def test_add_directory_separator__path_is_null__then_return_string_empty(
         self
     ) -> None:
-        assert self.sanitizer.add_directory_separator(None) == ""
+        assert self._sanitizer.add_directory_separator(None) == ""
 
     def test_add_directory_separator__path_is_empty__then_return_string_empty(
         self
     ) -> None:
-        assert self.sanitizer.add_directory_separator("") == self.create_path_sanitized("")
-        assert self.sanitizer.add_directory_separator(" ") == self.create_path_sanitized("")
+        assert self._sanitizer.add_directory_separator("") == self.create_path_sanitized("")
+        assert self._sanitizer.add_directory_separator(" ") == self.create_path_sanitized("")
 
     def test_add_directory_separator__path_is_reported__then_return_string(
         self
     ) -> None:
-        assert self.sanitizer.add_directory_separator("1") == self.create_path_sanitized("1", "")
-        assert self.sanitizer.add_directory_separator(self.create_path_to_sanitize("1", "2")) == self.create_path_sanitized("1", "2", "")
-        assert self.sanitizer.add_directory_separator(self.create_path_to_sanitize("1", "2", "3")) == self.create_path_sanitized("1", "2", "3", "")
-        assert self.sanitizer.add_directory_separator(self.create_path_to_sanitize("", "1")) == self.create_path_sanitized("", "1", "")
-        assert self.sanitizer.add_directory_separator(self.create_path_to_sanitize("", "1", "2")) == self.create_path_sanitized("", "1", "2", "")
-        assert self.sanitizer.add_directory_separator(self.create_path_to_sanitize("", "1", "2", "3")) == self.create_path_sanitized("", "1", "2", "3", "")
+        assert self._sanitizer.add_directory_separator("1") == self.create_path_sanitized("1", "")
+        assert self._sanitizer.add_directory_separator(self.create_path_to_sanitize("1", "2")) == self.create_path_sanitized("1", "2", "")
+        assert self._sanitizer.add_directory_separator(self.create_path_to_sanitize("1", "2", "3")) == self.create_path_sanitized("1", "2", "3", "")
+        assert self._sanitizer.add_directory_separator(self.create_path_to_sanitize("", "1")) == self.create_path_sanitized("", "1", "")
+        assert self._sanitizer.add_directory_separator(self.create_path_to_sanitize("", "1", "2")) == self.create_path_sanitized("", "1", "2", "")
+        assert self._sanitizer.add_directory_separator(self.create_path_to_sanitize("", "1", "2", "3")) == self.create_path_sanitized("", "1", "2", "3", "")
