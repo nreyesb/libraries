@@ -33,6 +33,17 @@ from toku.storage.driver.gcs import GcsStorageDriver
 class GcsStorageDriverTests(AbstractStorageDriverTest[GcsStorageDriver]):
     """
     Provides the local storage driver tests.
+
+    To run the tests is required to set the following environment variables:
+
+    - GCP_PROJECT_ID = It's the id of the GCP project
+    - GCP_BUCKET_NAME = It's the name of the bucket
+    - GCP_CREDENTIALS_FILE = It's the JSON credentials file (a service account is recommended)
+
+    To do that it's possible to run `export {variable}={value}`
+
+    The tests will not create the bucket, but it considerers to delete the created
+    root folder for the tests to clean the bucket.
     """
 
     GCP_PROJECT_ID: str = ""

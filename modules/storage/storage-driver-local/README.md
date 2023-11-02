@@ -28,7 +28,12 @@ poetry run python -m pip install {artifact_path}
 
 ##### Configuration
 
-The library doesn't require any specific configuration to use it.
+The library requires the followig configuration:
+
+**Runtime**
+
+- The root folder needs to exists, the artifact doesn't create it.
+- The artifact requiries permissions over the root to perform read and write operations.
 
 ##### Example
 

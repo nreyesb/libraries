@@ -28,7 +28,27 @@ poetry run python -m pip install {artifact_path}
 
 ##### Configuration
 
-The library doesn't require any specific configuration to use it.
+The library requires the followig configuration:
+
+**Runtime**
+
+- The GCP project needs to exists, the artifact doesn't create it.
+- The bucket needs to exists, the artifact doesn't create it.
+- The bucket has to be part of the same GCP project reported.
+- The artifact requiries a JSON credentials file (a service account is recommended) with permissions over the bucket to perform read and write operations.
+
+**Tests**
+
+Set the following environment variables:
+
+- GCP_PROJECT_ID = It's the id of the GCP project
+- GCP_BUCKET_NAME = It's the name of the bucket
+- GCP_CREDENTIALS_FILE = It's the JSON credentials file (a service account is recommended)
+
+To do that it's possible to run `export {variable}={value}`
+
+The tests will not create the bucket, but it considerers to delete the created
+root folder for the tests to clean the bucket.
 
 ##### Example
 
