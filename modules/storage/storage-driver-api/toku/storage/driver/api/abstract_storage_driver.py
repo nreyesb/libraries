@@ -7,7 +7,7 @@ All rights reserved.
 
 This software is provided for internal use only and may not be
 distributed, reproduced, or disclosed to any third party without
-prior written permission from Your Company Name.
+prior written permission from Toku.
 
 Module: abstract_storage_driver.py
 Author: Toku Dev
@@ -62,7 +62,7 @@ class AbstractStorageDriver(StorageDriver, ABC):
     @abstractmethod
     def _get_as_input_stream(self, file: str) -> BufferedReader:
         """
-        Provide the process to get a BufferedReader object as an input stream from a file.
+        Provides the process to get a BufferedReader object as an input stream from a file.
 
         Args:
             file (str): Full file path.
@@ -124,7 +124,7 @@ class AbstractStorageDriver(StorageDriver, ABC):
     @abstractmethod
     def _put_file_as(self, source: BufferedReader, file: str) -> bool:
         """
-        Provide the process to put the content from source into a file.
+        Provides the process to put the content from source into a file.
 
         Args:
             source (Union[bytes, str, BufferedReader]): The content to be put into the file.
@@ -147,7 +147,7 @@ class AbstractStorageDriver(StorageDriver, ABC):
     @abstractmethod
     def _append(self, source: bytes, file: str) -> bool:
         """
-        Provide the process to append content to a file.
+        Provides the process to append content to a file.
 
         Args:
             source (bytes): Content as byte arrays.
@@ -213,7 +213,7 @@ class AbstractStorageDriver(StorageDriver, ABC):
     @abstractmethod
     def _delete(self, file: str) -> bool:
         """
-        Provide the process to delete a file.
+        Provides the process to delete a file.
 
         Args:
             file (str): Full file path.
@@ -246,7 +246,7 @@ class AbstractStorageDriver(StorageDriver, ABC):
     @abstractmethod
     def _rename(self, source: str, target: str) -> bool:
         """
-        Provide the process to rename a file from source to target.
+        Provides the process to rename a file from source to target.
 
         Args:
             source (str): Full file path of the source.
@@ -263,7 +263,7 @@ class AbstractStorageDriver(StorageDriver, ABC):
     @abstractmethod
     def _files(self, directory: str) -> list[str]:
         """
-        Provide the process to get the files in the specified directory.
+        Provides the process to get the files in the specified directory.
 
         Args:
             directory (str): The directory to get files from.
@@ -279,7 +279,7 @@ class AbstractStorageDriver(StorageDriver, ABC):
     @abstractmethod
     def _all_files(self, directory: str) -> list[str]:
         """
-        Provide the process to get all files, recursively, in the specified directory.
+        Provides the process to get all files, recursively, in the specified directory.
 
         Args:
             directory (str): The directory to get files from.
@@ -295,7 +295,7 @@ class AbstractStorageDriver(StorageDriver, ABC):
     @abstractmethod
     def _directories(self, directory: str) -> list[str]:
         """
-        Provide the process to get the directories in the specified directory.
+        Provides the process to get the directories in the specified directory.
 
         Args:
             directory (str): The directory to get subdirectories from.
@@ -311,7 +311,7 @@ class AbstractStorageDriver(StorageDriver, ABC):
     @abstractmethod
     def _all_directories(self, directory: str) -> list[str]:
         """
-        Provide the process to get all directories, recursively, in the specified directory.
+        Provides the process to get all directories, recursively, in the specified directory.
 
         Args:
             directory (str): The directory to get subdirectories from.
@@ -370,7 +370,7 @@ class AbstractStorageDriver(StorageDriver, ABC):
         target_storage_driver: Optional['StorageDriver'] = None
     ) -> bool:
         """
-        Provide the process to copy or move each file in `source` to `target`
+        Provides the process to copy or move each file in `source` to `target`
         including its subdirectories.
 
         If `target_storage_driver` is None then the same storage driver is used.
@@ -483,7 +483,7 @@ class AbstractStorageDriver(StorageDriver, ABC):
     @abstractmethod
     def _make_directory(self, directory: str) -> bool:
         """
-        Provide the process to create a directory.
+        Provides the process to create a directory.
 
         Args:
             directory (str): Full directory path.
@@ -508,7 +508,7 @@ class AbstractStorageDriver(StorageDriver, ABC):
     @abstractmethod
     def _delete_directory(self, directory: str) -> bool:
         """
-        Provide the process to delete a directory.
+        Provides the process to delete a directory.
 
         Args:
             directory (str): Full directory path.
@@ -545,7 +545,7 @@ class AbstractStorageDriver(StorageDriver, ABC):
     @abstractmethod
     def _rename_directory(self, source: str, target: str) -> bool:
         """
-        Provide the process to rename a directory from source to target.
+        Provides the process to rename a directory from source to target.
 
         Args:
             source (str): Full directory path of the source.

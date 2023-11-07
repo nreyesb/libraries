@@ -13,7 +13,7 @@ All rights reserved.
 
 This software is provided for internal use only and may not be
 distributed, reproduced, or disclosed to any third party without
-prior written permission from Your Company Name.
+prior written permission from Toku.
 
 Module: storage_driver_test.py
 Author: Toku Dev
@@ -32,12 +32,12 @@ class StorageDriverTest(ABC, EnforceOverrides, Generic[T]):
     """
 
     @abstractmethod
-    def initialize_test(self) -> None:
+    def _initialize_test(self) -> None:
         """
         """
 
     @abstractmethod
-    def teardown_test(self) -> None:
+    def _teardown_test(self) -> None:
         """
         """
 
@@ -47,17 +47,12 @@ class StorageDriverTest(ABC, EnforceOverrides, Generic[T]):
         """
 
     @abstractmethod
-    def test_open__unsuccessful_driver_initialization__then_return_void(self) -> None:
+    def test_open__unsuccessful_driver_initialization__then_raise_exception(self) -> None:
         """
         """
 
     @abstractmethod
     def test_close__successful_driver_completion__then_return_void(self) -> None:
-        """
-        """
-
-    @abstractmethod
-    def test_close__unsuccessful_driver_completion__then_return_void(self) -> None:
         """
         """
 

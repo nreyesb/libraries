@@ -13,7 +13,7 @@ All rights reserved.
 
 This software is provided for internal use only and may not be
 distributed, reproduced, or disclosed to any third party without
-prior written permission from Your Company Name.
+prior written permission from Toku.
 
 Module: path_sanitizer_storage_driver_decorator_tests.py
 Author: Toku Dev
@@ -97,7 +97,7 @@ class PathSanitizerStorageDriverDecoratorTests:
         self._storage_driver_decorator: PathSanitizerStorageDriverDecorator = PathSanitizerStorageDriverDecorator(self._storage_driver)
         self._sanitizer: PathSanitizer = self._storage_driver_decorator._sanitizer  # pylint: disable=protected-access
 
-    def create_path(self, path: str) -> PathHelper:
+    def _create_path(self, path: str) -> PathHelper:
         """
         Create a path to sanitize function by replacing / and \\ in the provided path with `separator_to_sanitize`.
         Also, create a path sanitized using `separator_sanitized`.
@@ -115,7 +115,7 @@ class PathSanitizerStorageDriverDecoratorTests:
 
         return PathHelper(path_to_sanitize, path_sanitized)
 
-    def create_byte_array(self) -> bytes:
+    def _create_byte_array(self) -> bytes:
         """
         Create a byte array from a string.
 
@@ -124,14 +124,14 @@ class PathSanitizerStorageDriverDecoratorTests:
         """
         return bytes(PathSanitizerStorageDriverDecoratorTests.FAKE.sentence(), "utf-8")
 
-    def create_input_stream(self) -> BufferedReader:
+    def _create_input_stream(self) -> BufferedReader:
         """
         Create an input stream from a byte array (`create_byte_array`).
 
         Returns:
             InputStream: The input stream.
         """
-        bytes_handle = BytesIO(self.create_byte_array())
+        bytes_handle = BytesIO(self._create_byte_array())
         return BufferedReader(bytes_handle)  # type: ignore[arg-type]
 
     def test_open__verify_method_invocation__then_return_void(
@@ -154,12 +154,10 @@ class PathSanitizerStorageDriverDecoratorTests:
         # prepare
         self._storage_driver_decorator.close()
 
-    def test_get__verify_method_invocation__then_return_optional_array_byte(
-        self
-    ) -> None:
+    def test_get__verify_method_invocation__then_return_optional_array_byte(self) -> None:
         # prepare
-        file: PathHelper = self.create_path("/get/file.txt/")
-        result_to_return: bytes = self.create_byte_array()
+        file: PathHelper = self._create_path("/get/file.txt/")
+        result_to_return: bytes = self._create_byte_array()
         flexmock(self._storage_driver_decorator).should_call("get").with_args(file.path_to_sanitize).and_return(result_to_return).once()
         flexmock(self._storage_driver).should_receive("get").with_args(file.path_sanitized).and_return(result_to_return).once()
         flexmock(self._sanitizer).should_call("sanitize").with_args(file.path_to_sanitize, True).and_return(file.path_sanitized).once()
@@ -170,12 +168,10 @@ class PathSanitizerStorageDriverDecoratorTests:
         # assert
         assert result == result_to_return
 
-    def test_get_as_input_stream__verify_method_invocation__then_return_optional_input_stream(
-        self
-    ) -> None:
+    def test_get_as_input_stream__verify_method_invocation__then_return_optional_input_stream(self) -> None:
         # prepare
-        file: PathHelper = self.create_path("/get_as_input_stream/file.txt/")
-        result_to_return: BufferedReader = self.create_input_stream()
+        file: PathHelper = self._create_path("/get_as_input_stream/file.txt/")
+        result_to_return: BufferedReader = self._create_input_stream()
         flexmock(self._storage_driver_decorator).should_call("get_as_input_stream").with_args(file.path_to_sanitize).and_return(result_to_return).once()
         flexmock(self._storage_driver).should_receive("get_as_input_stream").with_args(file.path_sanitized).and_return(result_to_return).once()
         flexmock(self._sanitizer).should_call("sanitize").with_args(file.path_to_sanitize, True).and_return(file.path_sanitized).once()
@@ -186,11 +182,9 @@ class PathSanitizerStorageDriverDecoratorTests:
         # assert
         assert result.read() if result else BytesIO() == result_to_return.read()
 
-    def test_exists__verify_method_invocation__then_return_boolean(
-        self
-    ) -> None:
+    def test_exists__verify_method_invocation__then_return_boolean(self) -> None:
         # prepare
-        file: PathHelper = self.create_path("/exists/file.txt/")
+        file: PathHelper = self._create_path("/exists/file.txt/")
         result_to_return = True
         flexmock(self._storage_driver_decorator).should_call("exists").with_args(file.path_to_sanitize).and_return(result_to_return).once()
         flexmock(self._storage_driver).should_receive("exists").with_args(file.path_sanitized).and_return(result_to_return).once()
@@ -202,12 +196,10 @@ class PathSanitizerStorageDriverDecoratorTests:
         # assert
         assert result == result_to_return
 
-    def test_put_file__byte_array_source__verify_method_invocation__then_return_optional_string(
-        self
-    ) -> None:
+    def test_put_file__byte_array_source__verify_method_invocation__then_return_optional_string(self) -> None:
         # prepare
-        source: bytes = self.create_byte_array()
-        directory: PathHelper = self.create_path("/1/")
+        source: bytes = self._create_byte_array()
+        directory: PathHelper = self._create_path("/1/")
         result_to_return = "abcd"
         flexmock(self._storage_driver_decorator).should_call("put_file").with_args(source, directory.path_to_sanitize).and_return(result_to_return).once()
         flexmock(self._storage_driver).should_receive("put_file").with_args(source, directory.path_sanitized).and_return(result_to_return).once()
@@ -219,12 +211,10 @@ class PathSanitizerStorageDriverDecoratorTests:
         # assert
         assert result == result_to_return
 
-    def test_put_file__string_source__verify_method_invocation__then_return_optional_string(
-        self
-    ) -> None:
+    def test_put_file__string_source__verify_method_invocation__then_return_optional_string(self) -> None:
         # prepare
-        source: PathHelper = self.create_path("/put-file/source.txt/")
-        directory: PathHelper = self.create_path("/1/")
+        source: PathHelper = self._create_path("/put-file/source.txt/")
+        directory: PathHelper = self._create_path("/1/")
         result_to_return = "abcd"
         flexmock(self._storage_driver_decorator).should_call("put_file").with_args(source.path_to_sanitize, directory.path_to_sanitize).and_return(result_to_return).once()
         flexmock(self._storage_driver).should_receive("put_file").with_args(source.path_sanitized, directory.path_sanitized).and_return(result_to_return).once()
@@ -237,12 +227,10 @@ class PathSanitizerStorageDriverDecoratorTests:
         # assert
         assert result == result_to_return
 
-    def test_put_file__input_stream_source__verify_method_invocation__then_return_optional_string(
-        self
-    ) -> None:
+    def test_put_file__input_stream_source__verify_method_invocation__then_return_optional_string(self) -> None:
         # prepare
-        source: BufferedReader = self.create_input_stream()
-        directory: PathHelper = self.create_path("/1/")
+        source: BufferedReader = self._create_input_stream()
+        directory: PathHelper = self._create_path("/1/")
         result_to_return = "abcd"
         flexmock(self._storage_driver_decorator).should_call("put_file").with_args(source, directory.path_to_sanitize).and_return(result_to_return).once()
         flexmock(self._storage_driver).should_receive("put_file").with_args(source, directory.path_sanitized).and_return(result_to_return).once()
@@ -254,12 +242,10 @@ class PathSanitizerStorageDriverDecoratorTests:
         # assert
         assert result == result_to_return
 
-    def test_put_file_as__byte_array_source__verify_method_invocation__then_return_boolean(
-        self
-    ) -> None:
+    def test_put_file_as__byte_array_source__verify_method_invocation__then_return_boolean(self) -> None:
         # prepare
-        source: bytes = self.create_byte_array()
-        file: PathHelper = self.create_path("/put-file-as-byte-array-source/file.txt/")
+        source: bytes = self._create_byte_array()
+        file: PathHelper = self._create_path("/put-file-as-byte-array-source/file.txt/")
         result_to_return = True
         flexmock(self._storage_driver_decorator).should_call("put_file_as").with_args(source, file.path_to_sanitize).and_return(result_to_return).once()
         flexmock(self._storage_driver).should_receive("put_file_as").with_args(source, file.path_sanitized).and_return(result_to_return).once()
@@ -271,12 +257,10 @@ class PathSanitizerStorageDriverDecoratorTests:
         # assert
         assert result == result_to_return
 
-    def test_put_file_as__string_source__verify_method_invocation__then_return_boolean(
-        self
-    ) -> None:
+    def test_put_file_as__string_source__verify_method_invocation__then_return_boolean(self) -> None:
         # prepare
-        source: PathHelper = self.create_path("/put-file-as-string-source/source.txt/")
-        file: PathHelper = self.create_path("/put-file-as-string-source/file.txt/")
+        source: PathHelper = self._create_path("/put-file-as-string-source/source.txt/")
+        file: PathHelper = self._create_path("/put-file-as-string-source/file.txt/")
         result_to_return = True
         flexmock(self._storage_driver_decorator).should_call("put_file_as").with_args(source.path_to_sanitize, file.path_to_sanitize).and_return(result_to_return).once()
         flexmock(self._storage_driver).should_receive("put_file_as").with_args(source.path_sanitized, file.path_sanitized).and_return(result_to_return).once()
@@ -289,12 +273,10 @@ class PathSanitizerStorageDriverDecoratorTests:
         # assert
         assert result == result_to_return
 
-    def test_put_file_as__input_stream_source__verify_method_invocation__then_return_boolean(
-        self
-    ) -> None:
+    def test_put_file_as__input_stream_source__verify_method_invocation__then_return_boolean(self) -> None:
         # prepare
-        source: BufferedReader = self.create_input_stream()
-        file: PathHelper = self.create_path("/put-file-as-input-stream-source/file.txt/")
+        source: BufferedReader = self._create_input_stream()
+        file: PathHelper = self._create_path("/put-file-as-input-stream-source/file.txt/")
         result_to_return = True
         flexmock(self._storage_driver_decorator).should_call("put_file_as").with_args(source, file.path_to_sanitize).and_return(result_to_return).once()
         flexmock(self._storage_driver).should_receive("put_file_as").with_args(source, file.path_sanitized).and_return(result_to_return).once()
@@ -306,12 +288,10 @@ class PathSanitizerStorageDriverDecoratorTests:
         # assert
         assert result == result_to_return
 
-    def test_append__verify_method_invocation__then_return_boolean(
-        self
-    ) -> None:
+    def test_append__verify_method_invocation__then_return_boolean(self) -> None:
         # prepare
-        source: bytes = self.create_byte_array()
-        file: PathHelper = self.create_path("/append/file.txt/")
+        source: bytes = self._create_byte_array()
+        file: PathHelper = self._create_path("/append/file.txt/")
         result_to_return = True
         flexmock(self._storage_driver_decorator).should_call("append").with_args(source, file.path_to_sanitize).and_return(result_to_return).once()
         flexmock(self._storage_driver).should_receive("append").with_args(source, file.path_sanitized).and_return(result_to_return).once()
@@ -323,12 +303,10 @@ class PathSanitizerStorageDriverDecoratorTests:
         # assert
         assert result == result_to_return
 
-    def test_copy__verify_method_invocation__then_return_boolean(
-        self
-    ) -> None:
+    def test_copy__verify_method_invocation__then_return_boolean(self) -> None:
         # prepare
-        source: PathHelper = self.create_path("/copy/source.txt/")
-        target: PathHelper = self.create_path("/copy/target.txt/")
+        source: PathHelper = self._create_path("/copy/source.txt/")
+        target: PathHelper = self._create_path("/copy/target.txt/")
         result_to_return = True
         flexmock(self._storage_driver_decorator).should_call("copy").with_args(source.path_to_sanitize, target.path_to_sanitize).and_return(result_to_return).once()
         flexmock(self._storage_driver).should_receive("copy").with_args(source.path_sanitized, target.path_sanitized).and_return(result_to_return).once()
@@ -341,13 +319,11 @@ class PathSanitizerStorageDriverDecoratorTests:
         # assert
         assert result == result_to_return
 
-    def test_copy__another_storage_driver__verify_method_invocation__then_return_boolean(
-        self
-    ) -> None:
+    def test_copy__another_storage_driver__verify_method_invocation__then_return_boolean(self) -> None:
         # prepare
         another_storage_driver = StubStorageDriver()
-        source: PathHelper = self.create_path("/copy/source.txt/")
-        target: PathHelper = self.create_path("/copy/target.txt/")
+        source: PathHelper = self._create_path("/copy/source.txt/")
+        target: PathHelper = self._create_path("/copy/target.txt/")
         result_to_return = True
         flexmock(self._storage_driver_decorator).should_call("copy").with_args(source.path_to_sanitize, target.path_to_sanitize, another_storage_driver).and_return(result_to_return).once()
         flexmock(self._storage_driver).should_receive("copy").with_args(source.path_sanitized, target.path_sanitized, another_storage_driver).and_return(result_to_return).once()
@@ -360,12 +336,10 @@ class PathSanitizerStorageDriverDecoratorTests:
         # assert
         assert result == result_to_return
 
-    def test_move__verify_method_invocation__then_return_boolean(
-        self
-    ) -> None:
+    def test_move__verify_method_invocation__then_return_boolean(self) -> None:
         # prepare
-        source: PathHelper = self.create_path("/move/source.txt/")
-        target: PathHelper = self.create_path("/move/target.txt/")
+        source: PathHelper = self._create_path("/move/source.txt/")
+        target: PathHelper = self._create_path("/move/target.txt/")
         result_to_return = True
         flexmock(self._storage_driver_decorator).should_call("move").with_args(source.path_to_sanitize, target.path_to_sanitize).and_return(result_to_return).once()
         flexmock(self._storage_driver).should_receive("move").with_args(source.path_sanitized, target.path_sanitized).and_return(result_to_return).once()
@@ -378,13 +352,11 @@ class PathSanitizerStorageDriverDecoratorTests:
         # assert
         assert result == result_to_return
 
-    def test_move__another_storage_driver__verify_method_invocation__then_return_boolean(
-        self
-    ) -> None:
+    def test_move__another_storage_driver__verify_method_invocation__then_return_boolean(self) -> None:
         # prepare
         another_storage_driver = StubStorageDriver()
-        source: PathHelper = self.create_path("/move/source.txt/")
-        target: PathHelper = self.create_path("/move/target.txt/")
+        source: PathHelper = self._create_path("/move/source.txt/")
+        target: PathHelper = self._create_path("/move/target.txt/")
         result_to_return = True
         flexmock(self._storage_driver_decorator).should_call("move").with_args(source.path_to_sanitize, target.path_to_sanitize, another_storage_driver).and_return(result_to_return).once()
         flexmock(self._storage_driver).should_receive("move").with_args(source.path_sanitized, target.path_sanitized, another_storage_driver).and_return(result_to_return).once()
@@ -397,11 +369,9 @@ class PathSanitizerStorageDriverDecoratorTests:
         # assert
         assert result == result_to_return
 
-    def test_delete__verify_method_invocation__then_return_boolean(
-        self
-    ) -> None:
+    def test_delete__verify_method_invocation__then_return_boolean(self) -> None:
         # prepare
-        file: PathHelper = self.create_path("/delete/file.txt/")
+        file: PathHelper = self._create_path("/delete/file.txt/")
         result_to_return = True
         flexmock(self._storage_driver_decorator).should_call("delete").with_args(file.path_to_sanitize).and_return(result_to_return).once()
         flexmock(self._storage_driver).should_receive("delete").with_args(file.path_sanitized).and_return(result_to_return).once()
@@ -413,12 +383,10 @@ class PathSanitizerStorageDriverDecoratorTests:
         # assert
         assert result == result_to_return
 
-    def test_rename__verify_method_invocation__then_return_boolean(
-        self
-    ) -> None:
+    def test_rename__verify_method_invocation__then_return_boolean(self) -> None:
         # prepare
-        source: PathHelper = self.create_path("/rename/source.txt/")
-        target: PathHelper = self.create_path("/rename/target.txt/")
+        source: PathHelper = self._create_path("/rename/source.txt/")
+        target: PathHelper = self._create_path("/rename/target.txt/")
         result_to_return = True
         flexmock(self._storage_driver_decorator).should_call("rename").with_args(source.path_to_sanitize, target.path_to_sanitize).and_return(result_to_return).once()
         flexmock(self._storage_driver).should_receive("rename").with_args(source.path_sanitized, target.path_sanitized).and_return(result_to_return).once()
@@ -431,14 +399,12 @@ class PathSanitizerStorageDriverDecoratorTests:
         # assert
         assert result == result_to_return
 
-    def test_files__verify_method_invocation__then_return_collection_string(
-        self
-    ) -> None:
+    def test_files__verify_method_invocation__then_return_collection_string(self) -> None:
         # prepare
-        directory: PathHelper = self.create_path("/files/")
-        file1: PathHelper = self.create_path("/files/1.txt/")
-        file2: PathHelper = self.create_path("/files/2.txt/")
-        file3: PathHelper = self.create_path("/files/3.txt/")
+        directory: PathHelper = self._create_path("/files/")
+        file1: PathHelper = self._create_path("/files/1.txt/")
+        file2: PathHelper = self._create_path("/files/2.txt/")
+        file3: PathHelper = self._create_path("/files/3.txt/")
         flexmock(self._storage_driver_decorator).should_call("files").with_args(directory.path_to_sanitize).and_return([file1.path_sanitized, file2.path_sanitized, file3.path_sanitized]).once()
         flexmock(self._storage_driver).should_receive("files").with_args(directory.path_sanitized).and_return([file1.path_to_sanitize, file2.path_to_sanitize, file3.path_to_sanitize]).once()
         flexmock(self._sanitizer).should_call("sanitize").with_args(directory.path_to_sanitize, True).and_return(directory.path_sanitized).once()
@@ -454,16 +420,14 @@ class PathSanitizerStorageDriverDecoratorTests:
         assert paths[1] == file2.path_sanitized
         assert paths[2] == file3.path_sanitized
 
-    def test_all_files__verify_method_invocation__then_return_collection_string(
-        self
-    ) -> None:
+    def test_all_files__verify_method_invocation__then_return_collection_string(self) -> None:
         # prepare
-        directory: PathHelper = self.create_path("/all-files/")
-        file1: PathHelper = self.create_path("/all-files/1.txt/")
-        file2: PathHelper = self.create_path("/all-files/2.txt/")
-        file3: PathHelper = self.create_path("/all-files/3.txt/")
-        file4: PathHelper = self.create_path("/all-files/2/2.txt/")
-        file5: PathHelper = self.create_path("/all-files/2/3.txt/")
+        directory: PathHelper = self._create_path("/all-files/")
+        file1: PathHelper = self._create_path("/all-files/1.txt/")
+        file2: PathHelper = self._create_path("/all-files/2.txt/")
+        file3: PathHelper = self._create_path("/all-files/3.txt/")
+        file4: PathHelper = self._create_path("/all-files/2/2.txt/")
+        file5: PathHelper = self._create_path("/all-files/2/3.txt/")
         flexmock(self._storage_driver_decorator).should_call("all_files").with_args(directory.path_to_sanitize).and_return([file1.path_sanitized, file2.path_sanitized, file3.path_sanitized, file4.path_sanitized, file5.path_sanitized]).once()
         flexmock(self._storage_driver).should_receive("all_files").with_args(directory.path_sanitized).and_return([file1.path_to_sanitize, file2.path_to_sanitize, file3.path_to_sanitize, file4.path_to_sanitize, file5.path_to_sanitize]).once()
         flexmock(self._sanitizer).should_call("sanitize").with_args(directory.path_to_sanitize, True).and_return(directory.path_sanitized).once()
@@ -483,14 +447,12 @@ class PathSanitizerStorageDriverDecoratorTests:
         assert paths[3] == file4.path_sanitized
         assert paths[4] == file5.path_sanitized
 
-    def test_directories__verify_method_invocation__then_return_collection_string(
-        self
-    ) -> None:
+    def test_directories__verify_method_invocation__then_return_collection_string(self) -> None:
         # prepare
-        directory: PathHelper = self.create_path("/directories/")
-        directory1: PathHelper = self.create_path("/directories/1/")
-        directory2: PathHelper = self.create_path("/directories/2/")
-        directory3: PathHelper = self.create_path("/directories/3/")
+        directory: PathHelper = self._create_path("/directories/")
+        directory1: PathHelper = self._create_path("/directories/1/")
+        directory2: PathHelper = self._create_path("/directories/2/")
+        directory3: PathHelper = self._create_path("/directories/3/")
         flexmock(self._storage_driver_decorator).should_call("directories").with_args(directory.path_to_sanitize).and_return([directory1.path_sanitized, directory2.path_sanitized, directory3.path_sanitized]).once()
         flexmock(self._storage_driver).should_receive("directories").with_args(directory.path_sanitized).and_return([directory1.path_to_sanitize, directory2.path_to_sanitize, directory3.path_to_sanitize]).once()
         flexmock(self._sanitizer).should_call("sanitize").with_args(directory.path_to_sanitize, True).and_return(directory.path_sanitized).once()
@@ -506,16 +468,14 @@ class PathSanitizerStorageDriverDecoratorTests:
         assert paths[1] == directory2.path_sanitized
         assert paths[2] == directory3.path_sanitized
 
-    def test_all_directories__verify_method_invocation__then_return_collection_string(
-        self
-    ) -> None:
+    def test_all_directories__verify_method_invocation__then_return_collection_string(self) -> None:
         # prepare
-        directory: PathHelper = self.create_path("/all-directories/")
-        directory1: PathHelper = self.create_path("/all-directories/1/")
-        directory2: PathHelper = self.create_path("/all-directories/2/")
-        directory3: PathHelper = self.create_path("/all-directories/3/")
-        directory4: PathHelper = self.create_path("/all-directories/2/2/")
-        directory5: PathHelper = self.create_path("/all-directories/2/3/")
+        directory: PathHelper = self._create_path("/all-directories/")
+        directory1: PathHelper = self._create_path("/all-directories/1/")
+        directory2: PathHelper = self._create_path("/all-directories/2/")
+        directory3: PathHelper = self._create_path("/all-directories/3/")
+        directory4: PathHelper = self._create_path("/all-directories/2/2/")
+        directory5: PathHelper = self._create_path("/all-directories/2/3/")
         flexmock(self._storage_driver_decorator).should_call("all_directories").with_args(directory.path_to_sanitize).and_return([directory1.path_sanitized, directory2.path_sanitized, directory3.path_sanitized, directory4.path_sanitized, directory5.path_sanitized]).once()
         flexmock(self._storage_driver).should_receive("all_directories").with_args(directory.path_sanitized).and_return([directory1.path_to_sanitize, directory2.path_to_sanitize, directory3.path_to_sanitize, directory4.path_to_sanitize, directory5.path_to_sanitize]).once()
         flexmock(self._sanitizer).should_call("sanitize").with_args(directory.path_to_sanitize, True).and_return(directory.path_sanitized).once()
@@ -535,11 +495,9 @@ class PathSanitizerStorageDriverDecoratorTests:
         assert paths[3] == directory4.path_sanitized
         assert paths[4] == directory5.path_sanitized
 
-    def test_exists_directory__verify_method_invocation__then_return_boolean(
-        self
-    ) -> None:
+    def test_exists_directory__verify_method_invocation__then_return_boolean(self) -> None:
         # prepare
-        directory: PathHelper = self.create_path("/exists-directory/")
+        directory: PathHelper = self._create_path("/exists-directory/")
         result_to_return = True
         flexmock(self._storage_driver_decorator).should_call("exists_directory").with_args(directory.path_to_sanitize).and_return(result_to_return).once()
         flexmock(self._storage_driver).should_receive("exists_directory").with_args(directory.path_sanitized).and_return(result_to_return).once()
@@ -551,12 +509,10 @@ class PathSanitizerStorageDriverDecoratorTests:
         # assert
         assert result == result_to_return
 
-    def test_copy_directory__verify_method_invocation__then_return_boolean(
-        self
-    ) -> None:
+    def test_copy_directory__verify_method_invocation__then_return_boolean(self) -> None:
         # prepare
-        source: PathHelper = self.create_path("/copy-directory/source/")
-        target: PathHelper = self.create_path("/copy-directory/target/")
+        source: PathHelper = self._create_path("/copy-directory/source/")
+        target: PathHelper = self._create_path("/copy-directory/target/")
         result_to_return = True
         flexmock(self._storage_driver_decorator).should_call("copy_directory").with_args(source.path_to_sanitize, target.path_to_sanitize).and_return(result_to_return).once()
         flexmock(self._storage_driver).should_receive("copy_directory").with_args(source.path_sanitized, target.path_sanitized).and_return(result_to_return).once()
@@ -569,13 +525,11 @@ class PathSanitizerStorageDriverDecoratorTests:
         # assert
         assert result == result_to_return
 
-    def test_copy_directory__another_storage_driver__verify_method_invocation__then_return_boolean(
-        self
-    ) -> None:
+    def test_copy_directory__another_storage_driver__verify_method_invocation__then_return_boolean(self) -> None:
         # prepare
         another_storage_driver = StubStorageDriver()
-        source: PathHelper = self.create_path("/copy-directory/source/")
-        target: PathHelper = self.create_path("/copy-directory/target/")
+        source: PathHelper = self._create_path("/copy-directory/source/")
+        target: PathHelper = self._create_path("/copy-directory/target/")
         result_to_return = True
         flexmock(self._storage_driver_decorator).should_call("copy_directory").with_args(source.path_to_sanitize, target.path_to_sanitize, another_storage_driver).and_return(result_to_return).once()
         flexmock(self._storage_driver).should_receive("copy_directory").with_args(source.path_sanitized, target.path_sanitized, another_storage_driver).and_return(result_to_return).once()
@@ -588,12 +542,10 @@ class PathSanitizerStorageDriverDecoratorTests:
         # assert
         assert result == result_to_return
 
-    def test_move_directory__verify_method_invocation__then_return_boolean(
-        self
-    ) -> None:
+    def test_move_directory__verify_method_invocation__then_return_boolean(self) -> None:
         # prepare
-        source: PathHelper = self.create_path("/move-directory/source/")
-        target: PathHelper = self.create_path("/move-directory/target/")
+        source: PathHelper = self._create_path("/move-directory/source/")
+        target: PathHelper = self._create_path("/move-directory/target/")
         result_to_return = True
         flexmock(self._storage_driver_decorator).should_call("move_directory").with_args(source.path_to_sanitize, target.path_to_sanitize).and_return(result_to_return).once()
         flexmock(self._storage_driver).should_receive("move_directory").with_args(source.path_sanitized, target.path_sanitized).and_return(result_to_return).once()
@@ -606,13 +558,11 @@ class PathSanitizerStorageDriverDecoratorTests:
         # assert
         assert result == result_to_return
 
-    def test_move_directory__another_storage_driver__verify_method_invocation__then_return_boolean(
-        self
-    ) -> None:
+    def test_move_directory__another_storage_driver__verify_method_invocation__then_return_boolean(self) -> None:
         # prepare
         another_storage_driver = StubStorageDriver()
-        source: PathHelper = self.create_path("/move-directory/source/")
-        target: PathHelper = self.create_path("/move-directory/target/")
+        source: PathHelper = self._create_path("/move-directory/source/")
+        target: PathHelper = self._create_path("/move-directory/target/")
         result_to_return = True
         flexmock(self._storage_driver_decorator).should_call("move_directory").with_args(source.path_to_sanitize, target.path_to_sanitize, another_storage_driver).and_return(result_to_return).once()
         flexmock(self._storage_driver).should_receive("move_directory").with_args(source.path_sanitized, target.path_sanitized, another_storage_driver).and_return(result_to_return).once()
@@ -625,11 +575,9 @@ class PathSanitizerStorageDriverDecoratorTests:
         # assert
         assert result == result_to_return
 
-    def test_make_directory__verify_method_invocation__then_return_boolean(
-        self
-    ) -> None:
+    def test_make_directory__verify_method_invocation__then_return_boolean(self) -> None:
         # prepare
-        directory: PathHelper = self.create_path("/make-directory/")
+        directory: PathHelper = self._create_path("/make-directory/")
         result_to_return = True
         flexmock(self._storage_driver_decorator).should_call("make_directory").with_args(directory.path_to_sanitize).and_return(result_to_return).once()
         flexmock(self._storage_driver).should_receive("make_directory").with_args(directory.path_sanitized).and_return(result_to_return).once()
@@ -641,11 +589,9 @@ class PathSanitizerStorageDriverDecoratorTests:
         # assert
         assert result == result_to_return
 
-    def test_delete_directory__verify_method_invocation__then_return_boolean(
-        self
-    ) -> None:
+    def test_delete_directory__verify_method_invocation__then_return_boolean(self) -> None:
         # prepare
-        directory: PathHelper = self.create_path("/delete-directory/")
+        directory: PathHelper = self._create_path("/delete-directory/")
         result_to_return = True
         flexmock(self._storage_driver_decorator).should_call("delete_directory").with_args(directory.path_to_sanitize).and_return(result_to_return).once()
         flexmock(self._storage_driver).should_receive("delete_directory").with_args(directory.path_sanitized).and_return(result_to_return).once()
@@ -657,12 +603,10 @@ class PathSanitizerStorageDriverDecoratorTests:
         # assert
         assert result == result_to_return
 
-    def test_rename_directory__verify_method_invocation__then_return_boolean(
-        self
-    ) -> None:
+    def test_rename_directory__verify_method_invocation__then_return_boolean(self) -> None:
         # prepare
-        source: PathHelper = self.create_path("/rename-directory/source/")
-        target: PathHelper = self.create_path("/rename-directory/target/")
+        source: PathHelper = self._create_path("/rename-directory/source/")
+        target: PathHelper = self._create_path("/rename-directory/target/")
         result_to_return = True
         flexmock(self._storage_driver_decorator).should_call("rename_directory").with_args(source.path_to_sanitize, target.path_to_sanitize).and_return(result_to_return).once()
         flexmock(self._storage_driver).should_receive("rename_directory").with_args(source.path_sanitized, target.path_sanitized).and_return(result_to_return).once()
@@ -676,11 +620,9 @@ class PathSanitizerStorageDriverDecoratorTests:
         assert result == result_to_return
 
 
-    def test_get_metadata__verify_method_invocation__then_return_optional_metadata(
-        self
-    ) -> None:
+    def test_get_metadata__verify_method_invocation__then_return_optional_metadata(self) -> None:
         # prepare
-        path: PathHelper = self.create_path("/metadata/path/")
+        path: PathHelper = self._create_path("/metadata/path/")
         result_to_return = Metadata(Size(100), 100, 100, 100, False, False, False, "")
         flexmock(self._storage_driver_decorator).should_call("get_metadata").with_args(path.path_to_sanitize).and_return(result_to_return).once()
         flexmock(self._storage_driver).should_receive("get_metadata").with_args(path.path_sanitized).and_return(result_to_return).once()
@@ -692,9 +634,7 @@ class PathSanitizerStorageDriverDecoratorTests:
         # assert
         assert result == result_to_return
 
-    def test_get_root__verify_method_invocation__then_return_string(
-        self
-    ) -> None:
+    def test_get_root__verify_method_invocation__then_return_string(self) -> None:
         # prepare
         result_to_return = "/root"
         flexmock(self._storage_driver_decorator).should_call("get_root").and_return(result_to_return).once()

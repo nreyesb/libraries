@@ -13,7 +13,7 @@ All rights reserved.
 
 This software is provided for internal use only and may not be
 distributed, reproduced, or disclosed to any third party without
-prior written permission from Your Company Name.
+prior written permission from Toku.
 
 Module: abstract_storage_driver_test.py
 Author: Toku Dev
@@ -74,7 +74,7 @@ class AbstractStorageDriverTest(StorageDriverTest[T], ABC, EnforceOverrides, Gen
         """
         # setup
         self._tempdir = tempfile.TemporaryDirectory()
-        self.initialize_test()
+        self._initialize_test()
         self._storage_driver: T = self._create_storage_driver()
         self._storage_driver.open()
         self._sanitizer: PathSanitizer = PathSanitizer(self._storage_driver.get_separator())
@@ -86,10 +86,10 @@ class AbstractStorageDriverTest(StorageDriverTest[T], ABC, EnforceOverrides, Gen
         # teardown
         self._tempdir.cleanup()
         self._storage_driver.close()
-        self.teardown_test()
+        self._teardown_test()
 
     @final
-    def create_string(self, words: Optional[int] = 20 ) -> str:
+    def _create_string(self, words: Optional[int] = 20 ) -> str:
         """
         Create a random string.
 
@@ -102,17 +102,17 @@ class AbstractStorageDriverTest(StorageDriverTest[T], ABC, EnforceOverrides, Gen
         return f"{self._fake.sentence(words)}"
 
     @final
-    def create_byte_array(self) -> bytes:
+    def _create_byte_array(self) -> bytes:
         """
         Create a byte array from a string.
 
         Returns:
             bytearray: The byte array.
         """
-        return bytes(self.create_string(), "utf-8")
+        return bytes(self._create_string(), "utf-8")
 
     @final
-    def create_input_stream(self, content: Optional[bytes] = None) -> BufferedReader:
+    def _create_input_stream(self, content: Optional[bytes] = None) -> BufferedReader:
         """
         Create an input stream from a byte array.
 
@@ -122,11 +122,11 @@ class AbstractStorageDriverTest(StorageDriverTest[T], ABC, EnforceOverrides, Gen
         Returns:
             InputStream: The input stream.
         """
-        bytes_handle = BytesIO(content if content else self.create_byte_array())
+        bytes_handle = BytesIO(content if content else self._create_byte_array())
         return BufferedReader(bytes_handle)  # type: ignore[arg-type]
 
     @final
-    def create_file_in_local(
+    def _create_file_in_local(
             self,
             directory: str,
             name: str
@@ -144,7 +144,7 @@ class AbstractStorageDriverTest(StorageDriverTest[T], ABC, EnforceOverrides, Gen
             FileCreatorData: The file creator data
         """
         temp_file: str = os.path.join(self._tempdir.name, directory, name)
-        content: bytes = self.create_byte_array()
+        content: bytes = self._create_byte_array()
 
         with open(temp_file, "wb") as file:
             file.write(content)
@@ -152,7 +152,7 @@ class AbstractStorageDriverTest(StorageDriverTest[T], ABC, EnforceOverrides, Gen
         return FileCreatorData(temp_file, content)
 
     @final
-    def create_file_in_storage_driver(
+    def _create_file_in_storage_driver(
             self,
             directory: Optional[str],
             name: str,
@@ -181,7 +181,7 @@ class AbstractStorageDriverTest(StorageDriverTest[T], ABC, EnforceOverrides, Gen
         return FileCreatorData(path, content)
 
     @final
-    def create_directory_in_storage_driver(
+    def _create_directory_in_storage_driver(
             self,
             directory: str,
             target_storage_driver: Optional[T] = None
@@ -227,7 +227,7 @@ class AbstractStorageDriverTest(StorageDriverTest[T], ABC, EnforceOverrides, Gen
     @final
     @override
     def test_get__file_in_directory__then_return_optional_byte_array(self) -> None:
-        file_creator_data: FileCreatorData = self.create_file_in_storage_driver("directory", "file.txt")
+        file_creator_data: FileCreatorData = self._create_file_in_storage_driver("directory", "file.txt")
         assert file_creator_data.path == self._sanitizer.sanitize("directory/file.txt")
         assert self._storage_driver.exists(file_creator_data.path)
         assert self._storage_driver.get(file_creator_data.path) == file_creator_data.content
@@ -235,7 +235,7 @@ class AbstractStorageDriverTest(StorageDriverTest[T], ABC, EnforceOverrides, Gen
     @final
     @override
     def test_get__file_in_root__then_return_optional_byte_array(self) -> None:
-        file_creator_data: FileCreatorData = self.create_file_in_storage_driver(None, "file.txt")
+        file_creator_data: FileCreatorData = self._create_file_in_storage_driver(None, "file.txt")
         assert file_creator_data.path == "file.txt"
         assert self._storage_driver.exists(file_creator_data.path)
         assert self._storage_driver.get(file_creator_data.path) == file_creator_data.content
@@ -262,7 +262,7 @@ class AbstractStorageDriverTest(StorageDriverTest[T], ABC, EnforceOverrides, Gen
     @final
     @override
     def test_get_as_input_stream__file_in_directory__then_return_optional_input_stream(self) -> None:
-        file_creator_data: FileCreatorData = self.create_file_in_storage_driver("directory", "file.txt")
+        file_creator_data: FileCreatorData = self._create_file_in_storage_driver("directory", "file.txt")
         assert file_creator_data.path == self._sanitizer.sanitize("directory/file.txt")
         assert self._storage_driver.exists(file_creator_data.path)
         is_: Optional[BufferedReader] = self._storage_driver.get_as_input_stream(file_creator_data.path)
@@ -273,7 +273,7 @@ class AbstractStorageDriverTest(StorageDriverTest[T], ABC, EnforceOverrides, Gen
     @final
     @override
     def test_get_as_input_stream__file_in_root__then_return_optional_input_stream(self) -> None:
-        file_creator_data: FileCreatorData = self.create_file_in_storage_driver(None, "file.txt")
+        file_creator_data: FileCreatorData = self._create_file_in_storage_driver(None, "file.txt")
         assert file_creator_data.path == "file.txt"
         assert self._storage_driver.exists(file_creator_data.path)
         is_: Optional[BufferedReader] = self._storage_driver.get_as_input_stream(file_creator_data.path)
@@ -303,23 +303,23 @@ class AbstractStorageDriverTest(StorageDriverTest[T], ABC, EnforceOverrides, Gen
     @final
     @override
     def test_exists__file_in_directory__then_return_true(self) -> None:
-        file_creator_data: FileCreatorData = self.create_file_in_storage_driver("directory", "file.txt")
+        file_creator_data: FileCreatorData = self._create_file_in_storage_driver("directory", "file.txt")
         assert file_creator_data.path == self._sanitizer.sanitize("directory/file.txt")
         assert self._storage_driver.exists(file_creator_data.path)
 
     @final
     @override
     def test_exists__file_in_root__then_return_true(self) -> None:
-        file_creator_data: FileCreatorData = self.create_file_in_storage_driver(None, "file.txt")
+        file_creator_data: FileCreatorData = self._create_file_in_storage_driver(None, "file.txt")
         assert file_creator_data.path == "file.txt"
         assert self._storage_driver.exists(file_creator_data.path)
 
     @final
     @override
     def test_put_file__byte_array__file_in_existing_file__then_return_optional_none(self) -> None:
-        content: bytes = self.create_byte_array()
+        content: bytes = self._create_byte_array()
         name: Optional[str] = None
-        file_creator_data: FileCreatorData = self.create_file_in_storage_driver(None, "file.txt")
+        file_creator_data: FileCreatorData = self._create_file_in_storage_driver(None, "file.txt")
         assert self._storage_driver.exists(file_creator_data.path)
         assert len(self._storage_driver.files("")) == 1
         name = self._storage_driver.put_file(content, file_creator_data.path)
@@ -331,8 +331,8 @@ class AbstractStorageDriverTest(StorageDriverTest[T], ABC, EnforceOverrides, Gen
     def test_put_file__byte_array__file_in_directory__then_return_optional_string(self) -> None:
         directory1: str = "directory1"
         directory2: str = "directory2"
-        content1: bytes = self.create_byte_array()
-        content2: bytes = self.create_byte_array()
+        content1: bytes = self._create_byte_array()
+        content2: bytes = self._create_byte_array()
         name: Optional[str] = ""
 
         # directory 1
@@ -360,7 +360,7 @@ class AbstractStorageDriverTest(StorageDriverTest[T], ABC, EnforceOverrides, Gen
     @final
     @override
     def test_put_file__byte_array__file_in_root__then_return_optional_string(self) -> None:
-        content: bytes = self.create_byte_array()
+        content: bytes = self._create_byte_array()
         name: Optional[str] = ""
 
         assert len(self._storage_driver.files("")) == 0
@@ -375,12 +375,12 @@ class AbstractStorageDriverTest(StorageDriverTest[T], ABC, EnforceOverrides, Gen
     @final
     @override
     def test_put_file__input_stream__file_in_existing_file__then_return_optional_none(self) -> None:
-        array: bytes = self.create_byte_array()
-        content: BufferedReader = self.create_input_stream(array)
+        array: bytes = self._create_byte_array()
+        content: BufferedReader = self._create_input_stream(array)
 
         name: Optional[str] = None
 
-        file_creator_data: FileCreatorData = self.create_file_in_storage_driver(None, "file.txt")
+        file_creator_data: FileCreatorData = self._create_file_in_storage_driver(None, "file.txt")
         assert self._storage_driver.exists(file_creator_data.path)
         assert len(self._storage_driver.files("")) == 1
         name = self._storage_driver.put_file(content, file_creator_data.path)
@@ -393,10 +393,10 @@ class AbstractStorageDriverTest(StorageDriverTest[T], ABC, EnforceOverrides, Gen
         directory1: str = "directory1"
         directory2: str = "directory2"
 
-        array1: bytes = self.create_byte_array()
-        array2: bytes = self.create_byte_array()
-        content1: BufferedReader = self.create_input_stream(array1)
-        content2: BufferedReader = self.create_input_stream(array2)
+        array1: bytes = self._create_byte_array()
+        array2: bytes = self._create_byte_array()
+        content1: BufferedReader = self._create_input_stream(array1)
+        content2: BufferedReader = self._create_input_stream(array2)
 
         name: Optional[str] = ""
 
@@ -427,12 +427,12 @@ class AbstractStorageDriverTest(StorageDriverTest[T], ABC, EnforceOverrides, Gen
     @final
     @override
     def test_put_file__input_stream__file_in_root__then_return_optional_string(self) -> None:
-        array1: bytes = self.create_byte_array()
-        array2: bytes = self.create_byte_array()
-        array3: bytes = self.create_byte_array()
-        content1: BufferedReader = self.create_input_stream(array1)
-        content2: BufferedReader = self.create_input_stream(array2)
-        content3: BufferedReader = self.create_input_stream(array3)
+        array1: bytes = self._create_byte_array()
+        array2: bytes = self._create_byte_array()
+        array3: bytes = self._create_byte_array()
+        content1: BufferedReader = self._create_input_stream(array1)
+        content2: BufferedReader = self._create_input_stream(array2)
+        content3: BufferedReader = self._create_input_stream(array3)
 
         name: Optional[str] = None
 
@@ -448,11 +448,11 @@ class AbstractStorageDriverTest(StorageDriverTest[T], ABC, EnforceOverrides, Gen
     @final
     @override
     def test_put_file__path_as_string__file_in_existing_file__then_return_optional_none(self) -> None:
-        content: str = self.create_file_in_local("", "file1").path
+        content: str = self._create_file_in_local("", "file1").path
 
         name: Optional[str] = None
 
-        file_creator_data: FileCreatorData = self.create_file_in_storage_driver(None, "file.txt")
+        file_creator_data: FileCreatorData = self._create_file_in_storage_driver(None, "file.txt")
         assert self._storage_driver.exists(file_creator_data.path)
         assert len(self._storage_driver.files("")) == 1
         name = self._storage_driver.put_file(content, file_creator_data.path)
@@ -465,8 +465,8 @@ class AbstractStorageDriverTest(StorageDriverTest[T], ABC, EnforceOverrides, Gen
         directory1: str = "directory1"
         directory2: str = "directory2"
 
-        content1: FileCreatorData = self.create_file_in_local("", "file1")
-        content2: FileCreatorData = self.create_file_in_local("", "file2")
+        content1: FileCreatorData = self._create_file_in_local("", "file1")
+        content2: FileCreatorData = self._create_file_in_local("", "file2")
 
         name: Optional[str] = None
 
@@ -495,7 +495,7 @@ class AbstractStorageDriverTest(StorageDriverTest[T], ABC, EnforceOverrides, Gen
     @final
     @override
     def test_put_file__path_as_string__file_in_root__then_return_optional_string(self) -> None:
-        content: str = self.create_file_in_local("", "file1").path
+        content: str = self._create_file_in_local("", "file1").path
 
         name: Optional[str] = None
 
@@ -512,8 +512,8 @@ class AbstractStorageDriverTest(StorageDriverTest[T], ABC, EnforceOverrides, Gen
         directory1: str = "directory1"
         directory2: str = "directory2"
 
-        content1: bytes = self.create_byte_array()
-        content2: bytes = self.create_byte_array()
+        content1: bytes = self._create_byte_array()
+        content2: bytes = self._create_byte_array()
 
         file1: str = self._sanitizer.concat(directory1, "file1.txt")
         file2: str = self._sanitizer.concat(directory2, "file2.txt")
@@ -539,7 +539,7 @@ class AbstractStorageDriverTest(StorageDriverTest[T], ABC, EnforceOverrides, Gen
     @final
     @override
     def test_put_file_as__byte_array__file_in_root__then_return_true(self) -> None:
-        content: bytes = self.create_byte_array()
+        content: bytes = self._create_byte_array()
 
         assert len(self._storage_driver.files("")) == 0
         assert self._storage_driver.put_file_as(content, "file1.txt")
@@ -551,8 +551,8 @@ class AbstractStorageDriverTest(StorageDriverTest[T], ABC, EnforceOverrides, Gen
     @override
     def test_put_file_as__byte_array__file_in_existing_file_as_directory__then_return_false(self) -> None:
         directory: str = "directory1"
-        content: bytes = self.create_byte_array()
-        file_creator_data: FileCreatorData = self.create_file_in_storage_driver(directory, "file1.txt")
+        content: bytes = self._create_byte_array()
+        file_creator_data: FileCreatorData = self._create_file_in_storage_driver(directory, "file1.txt")
 
         assert not self._storage_driver.put_file_as(content, self._sanitizer.concat(file_creator_data.path, "file2.txt"))
         assert self._storage_driver.exists(file_creator_data.path)
@@ -561,7 +561,7 @@ class AbstractStorageDriverTest(StorageDriverTest[T], ABC, EnforceOverrides, Gen
     @final
     @override
     def test_put_file_as__byte_array__file_without_name__then_return_false(self) -> None:
-        content: bytes = self.create_byte_array()
+        content: bytes = self._create_byte_array()
 
         assert self._storage_driver.make_directory("directory")
         assert not self._storage_driver.put_file_as(content, "directory")
@@ -574,10 +574,10 @@ class AbstractStorageDriverTest(StorageDriverTest[T], ABC, EnforceOverrides, Gen
     def test_put_file_as__input_stream__file_in_directory__then_return_true(self) -> None:
         directory1: str = "directory1"
         directory2: str = "directory2"
-        array1: bytes = self.create_byte_array()
-        array2: bytes = self.create_byte_array()
-        content1: BufferedReader = self.create_input_stream(array1)
-        content2: BufferedReader = self.create_input_stream(array2)
+        array1: bytes = self._create_byte_array()
+        array2: bytes = self._create_byte_array()
+        content1: BufferedReader = self._create_input_stream(array1)
+        content2: BufferedReader = self._create_input_stream(array2)
         file1: str = self._sanitizer.concat(directory1, "file1.txt")
         file2: str = self._sanitizer.concat(directory2, "file2.txt")
 
@@ -604,12 +604,12 @@ class AbstractStorageDriverTest(StorageDriverTest[T], ABC, EnforceOverrides, Gen
     @final
     @override
     def test_put_file_as__input_stream__file_in_root__then_return_true(self) -> None:
-        array1: bytes = self.create_byte_array()
-        array2: bytes = self.create_byte_array()
-        array3: bytes = self.create_byte_array()
-        content1: BufferedReader = self.create_input_stream(array1)
-        content2: BufferedReader = self.create_input_stream(array2)
-        content3: BufferedReader = self.create_input_stream(array3)
+        array1: bytes = self._create_byte_array()
+        array2: bytes = self._create_byte_array()
+        array3: bytes = self._create_byte_array()
+        content1: BufferedReader = self._create_input_stream(array1)
+        content2: BufferedReader = self._create_input_stream(array2)
+        content3: BufferedReader = self._create_input_stream(array3)
 
         assert len(self._storage_driver.files("")) == 0
         assert self._storage_driver.put_file_as(content1, "file1.txt")
@@ -621,9 +621,9 @@ class AbstractStorageDriverTest(StorageDriverTest[T], ABC, EnforceOverrides, Gen
     @override
     def test_put_file_as__input_stream__file_in_existing_file_as_directory__then_return_false(self) -> None:
         directory: str = "directory1"
-        array: bytes = self.create_byte_array()
-        content: BufferedReader = self.create_input_stream(array)
-        file_creator_data: FileCreatorData = self.create_file_in_storage_driver(directory, "file1.txt")
+        array: bytes = self._create_byte_array()
+        content: BufferedReader = self._create_input_stream(array)
+        file_creator_data: FileCreatorData = self._create_file_in_storage_driver(directory, "file1.txt")
 
         assert not self._storage_driver.put_file_as(content, self._sanitizer.concat(file_creator_data.path, "file2.txt"))
         assert self._storage_driver.exists(file_creator_data.path)
@@ -632,8 +632,8 @@ class AbstractStorageDriverTest(StorageDriverTest[T], ABC, EnforceOverrides, Gen
     @final
     @override
     def test_put_file_as__input_stream__file_without_name__then_return_false(self) -> None:
-        array: bytes = self.create_byte_array()
-        content: BufferedReader = self.create_input_stream(array)
+        array: bytes = self._create_byte_array()
+        content: BufferedReader = self._create_input_stream(array)
 
         assert self._storage_driver.make_directory("directory")
         assert not self._storage_driver.put_file_as(content, "directory")
@@ -646,8 +646,8 @@ class AbstractStorageDriverTest(StorageDriverTest[T], ABC, EnforceOverrides, Gen
     def test_put_file_as__path_as_string__file_in_directory__then_return_true(self) -> None:
         directory1: str = "directory1"
         directory2: str = "directory2"
-        content1: FileCreatorData = self.create_file_in_local("", "file1")
-        content2: FileCreatorData = self.create_file_in_local("", "file2")
+        content1: FileCreatorData = self._create_file_in_local("", "file1")
+        content2: FileCreatorData = self._create_file_in_local("", "file2")
         path1: str = self._sanitizer.concat(directory1, "file1.txt")
         path2: str = self._sanitizer.concat(directory2, "file2.txt")
 
@@ -672,7 +672,7 @@ class AbstractStorageDriverTest(StorageDriverTest[T], ABC, EnforceOverrides, Gen
     @final
     @override
     def test_put_file_as__path_as_string__file_in_root__then_return_true(self) -> None:
-        content: str = self.create_file_in_local("", "file").path
+        content: str = self._create_file_in_local("", "file").path
 
         assert len(self._storage_driver.files("")) == 0
         assert self._storage_driver.put_file_as(content, "file1.txt")
@@ -684,8 +684,8 @@ class AbstractStorageDriverTest(StorageDriverTest[T], ABC, EnforceOverrides, Gen
     @override
     def test_put_file_as__path_as_string__file_in_existing_file_as_directory__then_return_false(self) -> None:
         directory: str = "directory1"
-        content: str = self.create_file_in_local("", "file1").path
-        file_creator_data: FileCreatorData = self.create_file_in_storage_driver(directory, "file1.txt")
+        content: str = self._create_file_in_local("", "file1").path
+        file_creator_data: FileCreatorData = self._create_file_in_storage_driver(directory, "file1.txt")
 
         assert not self._storage_driver.put_file_as(content, self._sanitizer.concat(file_creator_data.path, "file2.txt"))
         assert self._storage_driver.exists(file_creator_data.path)
@@ -694,7 +694,7 @@ class AbstractStorageDriverTest(StorageDriverTest[T], ABC, EnforceOverrides, Gen
     @final
     @override
     def test_put_file_as__path_as_string__file_without_name__then_return_false(self) -> None:
-        content: str = self.create_file_in_local("", "file").path
+        content: str = self._create_file_in_local("", "file").path
 
         assert self._storage_driver.make_directory("directory")
         assert not self._storage_driver.put_file_as(content, "directory")
@@ -709,29 +709,29 @@ class AbstractStorageDriverTest(StorageDriverTest[T], ABC, EnforceOverrides, Gen
         assert self._storage_driver.exists_directory("directory")
         assert not self._storage_driver.exists("file.txt")
         assert not self._storage_driver.exists(self._sanitizer.sanitize("directory/file.txt"))
-        assert not self._storage_driver.append(self.create_byte_array(), "file.txt")
-        assert not self._storage_driver.append(self.create_byte_array(), self._sanitizer.sanitize("directory/file.txt"))
+        assert not self._storage_driver.append(self._create_byte_array(), "file.txt")
+        assert not self._storage_driver.append(self._create_byte_array(), self._sanitizer.sanitize("directory/file.txt"))
 
     @final
     @override
     def test_append__file_is_directory__then_return_false(self) -> None:
         assert self._storage_driver.make_directory("directory")
         assert self._storage_driver.exists_directory("directory")
-        assert not self._storage_driver.append(self.create_byte_array(), "directory")
+        assert not self._storage_driver.append(self._create_byte_array(), "directory")
 
     @final
     @override
     def test_append__file_is_root__then_return_false(self) -> None:
-        assert not self._storage_driver.append(self.create_byte_array(), "")
-        assert not self._storage_driver.append(self.create_byte_array(), "    ")
+        assert not self._storage_driver.append(self._create_byte_array(), "")
+        assert not self._storage_driver.append(self._create_byte_array(), "    ")
 
     @final
     @override
     def test_append__file_in_directory__then_return_true(self) -> None:
         directory: str = "directory"
         file: str = "file.txt"
-        original: str = self.create_string()
-        append: str = self.create_string()
+        original: str = self._create_string()
+        append: str = self._create_string()
 
         assert self._storage_driver.put_file_as(original.encode("UTF-8"), self._sanitizer.concat(directory, file))
         assert self._storage_driver.exists(self._sanitizer.concat(directory, file))
@@ -742,8 +742,8 @@ class AbstractStorageDriverTest(StorageDriverTest[T], ABC, EnforceOverrides, Gen
     @override
     def test_append__file_in_root__then_return_true(self) -> None:
         file: str = "file.txt"
-        original: str = self.create_string()
-        append: str = self.create_string()
+        original: str = self._create_string()
+        append: str = self._create_string()
 
         assert self._storage_driver.put_file_as(original.encode("UTF-8"), file)
         assert self._storage_driver.exists(file)
@@ -784,8 +784,8 @@ class AbstractStorageDriverTest(StorageDriverTest[T], ABC, EnforceOverrides, Gen
     @final
     @override
     def test_copy__target_is_directory__then_return_false(self) -> None:
-        file_creator_data: FileCreatorData = self.create_file_in_storage_driver("", "file.txt")
-        directory: str = self.create_directory_in_storage_driver("directory")
+        file_creator_data: FileCreatorData = self._create_file_in_storage_driver("", "file.txt")
+        directory: str = self._create_directory_in_storage_driver("directory")
 
         assert self._storage_driver.exists(file_creator_data.path)
         assert self._storage_driver.exists_directory(directory)
@@ -794,7 +794,7 @@ class AbstractStorageDriverTest(StorageDriverTest[T], ABC, EnforceOverrides, Gen
     @final
     @override
     def test_copy__target_is_root__then_return_false(self) -> None:
-        file_creator_data: FileCreatorData = self.create_file_in_storage_driver("", "file.txt")
+        file_creator_data: FileCreatorData = self._create_file_in_storage_driver("", "file.txt")
 
         assert self._storage_driver.exists(file_creator_data.path)
         assert not self._storage_driver.copy(file_creator_data.path, "")
@@ -803,7 +803,7 @@ class AbstractStorageDriverTest(StorageDriverTest[T], ABC, EnforceOverrides, Gen
     @final
     @override
     def test_copy__source_exists_and_target_is_source__then_return_false(self) -> None:
-        file_creator_data: FileCreatorData = self.create_file_in_storage_driver("", "file.txt")
+        file_creator_data: FileCreatorData = self._create_file_in_storage_driver("", "file.txt")
         assert self._storage_driver.exists(file_creator_data.path)
         assert not self._storage_driver.copy(file_creator_data.path, file_creator_data.path)
 
@@ -813,7 +813,7 @@ class AbstractStorageDriverTest(StorageDriverTest[T], ABC, EnforceOverrides, Gen
         directory: str = "directory"
         original_file: str = "file.txt"
         copy_file: str = "copy.txt"
-        content: bytes = self.create_byte_array()
+        content: bytes = self._create_byte_array()
 
         assert self._storage_driver.put_file_as(content, self._sanitizer.concat(directory, original_file))
         assert self._storage_driver.exists(self._sanitizer.concat(directory, original_file))
@@ -835,9 +835,9 @@ class AbstractStorageDriverTest(StorageDriverTest[T], ABC, EnforceOverrides, Gen
         directory: str = "directory"
         original_file: str = "file.txt"
         copy_file: str = "copy.txt"
-        content1: bytes = self.create_byte_array()
-        content2: bytes = self.create_byte_array()
-        content3: bytes = self.create_byte_array()
+        content1: bytes = self._create_byte_array()
+        content2: bytes = self._create_byte_array()
+        content3: bytes = self._create_byte_array()
 
         assert self._storage_driver.put_file_as(content1, self._sanitizer.concat(directory, original_file))
         assert self._storage_driver.put_file_as(content2, self._sanitizer.concat(directory, copy_file))
@@ -861,8 +861,8 @@ class AbstractStorageDriverTest(StorageDriverTest[T], ABC, EnforceOverrides, Gen
     @override
     def test_copy__another_storage_driver__target_is_directory__then_return_false(self) -> None:
         with self._create_storage_driver_secondary() as target_storage_driver:
-            file_creator_data: FileCreatorData = self.create_file_in_storage_driver("", "file.txt")
-            directory: str = self.create_directory_in_storage_driver("directory", target_storage_driver)
+            file_creator_data: FileCreatorData = self._create_file_in_storage_driver("", "file.txt")
+            directory: str = self._create_directory_in_storage_driver("directory", target_storage_driver)
 
             assert self._storage_driver.exists(file_creator_data.path)
             assert target_storage_driver.exists_directory(directory)
@@ -872,7 +872,7 @@ class AbstractStorageDriverTest(StorageDriverTest[T], ABC, EnforceOverrides, Gen
     @override
     def test_copy__another_storage_driver__target_is_root__then_return_false(self) -> None:
         with self._create_storage_driver_secondary() as target_storage_driver:
-            file_creator_data: FileCreatorData = self.create_file_in_storage_driver("", "file.txt")
+            file_creator_data: FileCreatorData = self._create_file_in_storage_driver("", "file.txt")
 
             assert self._storage_driver.exists(file_creator_data.path)
             assert not self._storage_driver.copy(file_creator_data.path, "", target_storage_driver)
@@ -882,7 +882,7 @@ class AbstractStorageDriverTest(StorageDriverTest[T], ABC, EnforceOverrides, Gen
     @override
     def test_copy__another_storage_driver__source_exists_and_target_is_source__then_return_true(self) -> None:
         with self._create_storage_driver_secondary() as target_storage_driver:
-            file_creator_data: FileCreatorData = self.create_file_in_storage_driver("", "file.txt")
+            file_creator_data: FileCreatorData = self._create_file_in_storage_driver("", "file.txt")
 
             assert self._storage_driver.exists(file_creator_data.path)
             assert self._storage_driver.copy(file_creator_data.path, file_creator_data.path, target_storage_driver)
@@ -894,7 +894,7 @@ class AbstractStorageDriverTest(StorageDriverTest[T], ABC, EnforceOverrides, Gen
             directory: str = "directory"
             original_file: str = "file.txt"
             copy_file: str = "copy.txt"
-            content: bytes = self.create_byte_array()
+            content: bytes = self._create_byte_array()
 
             assert self._storage_driver.put_file_as(content, self._sanitizer.concat(directory, original_file))
             assert self._storage_driver.exists(self._sanitizer.concat(directory, original_file))
@@ -917,9 +917,9 @@ class AbstractStorageDriverTest(StorageDriverTest[T], ABC, EnforceOverrides, Gen
             directory: str = "directory"
             original_file: str = "file.txt"
             copy_file: str = "copy.txt"
-            content1: bytes = self.create_byte_array()
-            content2: bytes = self.create_byte_array()
-            content3: bytes = self.create_byte_array()
+            content1: bytes = self._create_byte_array()
+            content2: bytes = self._create_byte_array()
+            content3: bytes = self._create_byte_array()
 
             assert self._storage_driver.put_file_as(content1, self._sanitizer.concat(directory, original_file))
             assert target_storage_driver.put_file_as(content2, self._sanitizer.concat(directory, copy_file))
@@ -974,8 +974,8 @@ class AbstractStorageDriverTest(StorageDriverTest[T], ABC, EnforceOverrides, Gen
     @final
     @override
     def test_move__target_is_directory__then_return_false(self) -> None:
-        file_creator_data: FileCreatorData = self.create_file_in_storage_driver("", "file.txt")
-        directory: str = self.create_directory_in_storage_driver("directory")
+        file_creator_data: FileCreatorData = self._create_file_in_storage_driver("", "file.txt")
+        directory: str = self._create_directory_in_storage_driver("directory")
 
         assert self._storage_driver.exists(file_creator_data.path)
         assert self._storage_driver.exists_directory(directory)
@@ -984,7 +984,7 @@ class AbstractStorageDriverTest(StorageDriverTest[T], ABC, EnforceOverrides, Gen
     @final
     @override
     def test_move__target_is_root__then_return_false(self) -> None:
-        file_creator_data: FileCreatorData = self.create_file_in_storage_driver("", "file.txt")
+        file_creator_data: FileCreatorData = self._create_file_in_storage_driver("", "file.txt")
 
         assert self._storage_driver.exists(file_creator_data.path)
         assert not self._storage_driver.move(file_creator_data.path, "")
@@ -993,7 +993,7 @@ class AbstractStorageDriverTest(StorageDriverTest[T], ABC, EnforceOverrides, Gen
     @final
     @override
     def test_move__source_exists_and_target_is_source__then_return_false(self) -> None:
-        file_creator_data: FileCreatorData = self.create_file_in_storage_driver("", "file.txt")
+        file_creator_data: FileCreatorData = self._create_file_in_storage_driver("", "file.txt")
 
         assert self._storage_driver.exists(file_creator_data.path)
         assert not self._storage_driver.move(file_creator_data.path, file_creator_data.path)
@@ -1004,7 +1004,7 @@ class AbstractStorageDriverTest(StorageDriverTest[T], ABC, EnforceOverrides, Gen
         directory: str = "directory"
         original_file: str = "file.txt"
         move_file: str = "move.txt"
-        content: bytes = self.create_byte_array()
+        content: bytes = self._create_byte_array()
 
         assert self._storage_driver.put_file_as(content, self._sanitizer.concat(directory, original_file))
         assert self._storage_driver.exists(self._sanitizer.concat(directory, original_file))
@@ -1026,9 +1026,9 @@ class AbstractStorageDriverTest(StorageDriverTest[T], ABC, EnforceOverrides, Gen
         directory: str = "directory"
         original_file: str = "file.txt"
         move_file: str = "move.txt"
-        content1: bytes = self.create_byte_array()
-        content2: bytes = self.create_byte_array()
-        content3: bytes = self.create_byte_array()
+        content1: bytes = self._create_byte_array()
+        content2: bytes = self._create_byte_array()
+        content3: bytes = self._create_byte_array()
 
         assert self._storage_driver.put_file_as(content1, self._sanitizer.concat(directory, original_file))
         assert self._storage_driver.put_file_as(content2, self._sanitizer.concat(directory, move_file))
@@ -1052,8 +1052,8 @@ class AbstractStorageDriverTest(StorageDriverTest[T], ABC, EnforceOverrides, Gen
     @override
     def test_move__another_storage_driver__target_is_directory__then_return_false(self) -> None:
         with self._create_storage_driver_secondary() as target_storage_driver:
-            file_creator_data: FileCreatorData = self.create_file_in_storage_driver("", "file.txt")
-            directory: str = self.create_directory_in_storage_driver("directory", target_storage_driver)
+            file_creator_data: FileCreatorData = self._create_file_in_storage_driver("", "file.txt")
+            directory: str = self._create_directory_in_storage_driver("directory", target_storage_driver)
 
             assert self._storage_driver.exists(file_creator_data.path)
             assert target_storage_driver.exists_directory(directory)
@@ -1063,7 +1063,7 @@ class AbstractStorageDriverTest(StorageDriverTest[T], ABC, EnforceOverrides, Gen
     @override
     def test_move__another_storage_driver__target_is_root__then_return_false(self) -> None:
         with self._create_storage_driver_secondary() as target_storage_driver:
-            file_creator_data: FileCreatorData = self.create_file_in_storage_driver("", "file.txt")
+            file_creator_data: FileCreatorData = self._create_file_in_storage_driver("", "file.txt")
 
             assert self._storage_driver.exists(file_creator_data.path)
             assert not self._storage_driver.move(file_creator_data.path, "", target_storage_driver)
@@ -1073,7 +1073,7 @@ class AbstractStorageDriverTest(StorageDriverTest[T], ABC, EnforceOverrides, Gen
     @override
     def test_move__another_storage_driver__source_exists_and_target_is_source__then_return_true(self) -> None:
         with self._create_storage_driver_secondary() as target_storage_driver:
-            file_creator_data: FileCreatorData = self.create_file_in_storage_driver("", "file.txt")
+            file_creator_data: FileCreatorData = self._create_file_in_storage_driver("", "file.txt")
 
             assert self._storage_driver.exists(file_creator_data.path)
             assert self._storage_driver.move(file_creator_data.path, file_creator_data.path, target_storage_driver)
@@ -1085,7 +1085,7 @@ class AbstractStorageDriverTest(StorageDriverTest[T], ABC, EnforceOverrides, Gen
             directory: str = "directory"
             original_file: str = "file.txt"
             move_file: str = "move.txt"
-            content: bytes = self.create_byte_array()
+            content: bytes = self._create_byte_array()
 
             assert self._storage_driver.put_file_as(content, self._sanitizer.concat(directory, original_file))
             assert self._storage_driver.exists(self._sanitizer.concat(directory, original_file))
@@ -1108,9 +1108,9 @@ class AbstractStorageDriverTest(StorageDriverTest[T], ABC, EnforceOverrides, Gen
             directory: str = "directory"
             original_file: str = "file.txt"
             move_file: str = "move.txt"
-            content1: bytes = self.create_byte_array()
-            content2: bytes = self.create_byte_array()
-            content3: bytes = self.create_byte_array()
+            content1: bytes = self._create_byte_array()
+            content2: bytes = self._create_byte_array()
+            content3: bytes = self._create_byte_array()
 
             assert self._storage_driver.put_file_as(content1, self._sanitizer.concat(directory, original_file))
             assert target_storage_driver.put_file_as(content2, self._sanitizer.concat(directory, move_file))
@@ -1139,8 +1139,8 @@ class AbstractStorageDriverTest(StorageDriverTest[T], ABC, EnforceOverrides, Gen
     @final
     @override
     def test_delete__file_is_directory__then_return_false(self) -> None:
-        root: str = self.create_directory_in_storage_driver("directory1")
-        directory: str = self.create_directory_in_storage_driver("directory2/directory3")
+        root: str = self._create_directory_in_storage_driver("directory1")
+        directory: str = self._create_directory_in_storage_driver("directory2/directory3")
 
         assert self._storage_driver.exists_directory(root)
         assert self._storage_driver.exists_directory(directory)
@@ -1156,8 +1156,8 @@ class AbstractStorageDriverTest(StorageDriverTest[T], ABC, EnforceOverrides, Gen
     @final
     @override
     def test_delete__file_exists__then_return_true(self) -> None:
-        assert self._storage_driver.put_file_as(self.create_byte_array(), "file.txt")
-        assert self._storage_driver.put_file_as(self.create_byte_array(), self._sanitizer.sanitize("directory/file.txt"))
+        assert self._storage_driver.put_file_as(self._create_byte_array(), "file.txt")
+        assert self._storage_driver.put_file_as(self._create_byte_array(), self._sanitizer.sanitize("directory/file.txt"))
         assert self._storage_driver.exists("file.txt")
         assert self._storage_driver.exists(self._sanitizer.sanitize("directory/file.txt"))
         assert self._storage_driver.delete("file.txt")
@@ -1186,8 +1186,8 @@ class AbstractStorageDriverTest(StorageDriverTest[T], ABC, EnforceOverrides, Gen
     @final
     @override
     def test_rename__source_is_directory__then_return_false(self) -> None:
-        root: str = self.create_directory_in_storage_driver("directory1")
-        directory: str = self.create_directory_in_storage_driver("directory2/directory3")
+        root: str = self._create_directory_in_storage_driver("directory1")
+        directory: str = self._create_directory_in_storage_driver("directory2/directory3")
 
         assert self._storage_driver.exists_directory(root)
         assert self._storage_driver.exists_directory(directory)
@@ -1198,9 +1198,9 @@ class AbstractStorageDriverTest(StorageDriverTest[T], ABC, EnforceOverrides, Gen
     @final
     @override
     def test_rename__target_exists__then_return_false(self) -> None:
-        file_creator_data_to_rename: FileCreatorData = self.create_file_in_storage_driver("", "file.txt")
-        file_creator_data_in_root: FileCreatorData = self.create_file_in_storage_driver("", "rename.txt")
-        file_creator_data_in_directory: FileCreatorData = self.create_file_in_storage_driver("directory", "rename.txt")
+        file_creator_data_to_rename: FileCreatorData = self._create_file_in_storage_driver("", "file.txt")
+        file_creator_data_in_root: FileCreatorData = self._create_file_in_storage_driver("", "rename.txt")
+        file_creator_data_in_directory: FileCreatorData = self._create_file_in_storage_driver("directory", "rename.txt")
 
         assert self._storage_driver.exists(file_creator_data_to_rename.path)
         assert self._storage_driver.exists(file_creator_data_in_root.path)
@@ -1211,7 +1211,7 @@ class AbstractStorageDriverTest(StorageDriverTest[T], ABC, EnforceOverrides, Gen
     @final
     @override
     def test_rename__target_is_root__then_return_false(self) -> None:
-        file_creator_data_to_rename: FileCreatorData = self.create_file_in_storage_driver("", "file.txt")
+        file_creator_data_to_rename: FileCreatorData = self._create_file_in_storage_driver("", "file.txt")
 
         assert self._storage_driver.exists(file_creator_data_to_rename.path)
         assert not self._storage_driver.rename(file_creator_data_to_rename.path, "")
@@ -1220,7 +1220,7 @@ class AbstractStorageDriverTest(StorageDriverTest[T], ABC, EnforceOverrides, Gen
     @final
     @override
     def test_rename__target_is_directory__then_return_false(self) -> None:
-        file_creator_data_to_rename: FileCreatorData = self.create_file_in_storage_driver("", "file.txt")
+        file_creator_data_to_rename: FileCreatorData = self._create_file_in_storage_driver("", "file.txt")
 
         assert self._storage_driver.make_directory("directory")
         assert self._storage_driver.exists_directory("directory")
@@ -1230,7 +1230,7 @@ class AbstractStorageDriverTest(StorageDriverTest[T], ABC, EnforceOverrides, Gen
     @final
     @override
     def test_rename__source_exists_and_target_is_source__then_return_false(self) -> None:
-        file_creator_data_to_rename: FileCreatorData = self.create_file_in_storage_driver("", "file.txt")
+        file_creator_data_to_rename: FileCreatorData = self._create_file_in_storage_driver("", "file.txt")
 
         assert self._storage_driver.exists(file_creator_data_to_rename.path)
         assert not self._storage_driver.rename(file_creator_data_to_rename.path, file_creator_data_to_rename.path)
@@ -1238,7 +1238,7 @@ class AbstractStorageDriverTest(StorageDriverTest[T], ABC, EnforceOverrides, Gen
     @final
     @override
     def test_rename__source_exists_and_target_not_exists__then_return_true(self) -> None:
-        file_creator_data_to_rename: FileCreatorData = self.create_file_in_storage_driver("", "file.txt")
+        file_creator_data_to_rename: FileCreatorData = self._create_file_in_storage_driver("", "file.txt")
 
         assert self._storage_driver.make_directory("directory")
         assert self._storage_driver.exists_directory("directory")
@@ -1260,8 +1260,8 @@ class AbstractStorageDriverTest(StorageDriverTest[T], ABC, EnforceOverrides, Gen
     @final
     @override
     def test_files__directory_is_file__then_return_collection_empty(self) -> None:
-        file_creator_data_in_root: FileCreatorData = self.create_file_in_storage_driver("", "file.txt")
-        file_creator_data_in_directory: FileCreatorData = self.create_file_in_storage_driver("directory", "file.txt")
+        file_creator_data_in_root: FileCreatorData = self._create_file_in_storage_driver("", "file.txt")
+        file_creator_data_in_directory: FileCreatorData = self._create_file_in_storage_driver("directory", "file.txt")
 
         assert self._storage_driver.exists(file_creator_data_in_root.path)
         assert self._storage_driver.exists(file_creator_data_in_directory.path)
@@ -1279,16 +1279,16 @@ class AbstractStorageDriverTest(StorageDriverTest[T], ABC, EnforceOverrides, Gen
         assert self._storage_driver.exists_directory(directory_first_level)
         assert self._storage_driver.exists_directory(directory_second_level)
         assert len(self._storage_driver.files(directory_first_level)) == 0
-        self.create_file_in_storage_driver(directory_first_level, "1.txt")
+        self._create_file_in_storage_driver(directory_first_level, "1.txt")
         assert len(self._storage_driver.files(directory_first_level)) == 1
         assert self._storage_driver.files(directory_first_level) == [self._sanitizer.concat(directory_first_level, "1.txt")]
-        self.create_file_in_storage_driver(directory_first_level, "2.txt")
+        self._create_file_in_storage_driver(directory_first_level, "2.txt")
         assert len(self._storage_driver.files(directory_first_level)) == 2
         assert set(self._storage_driver.files(directory_first_level)) == {
             self._sanitizer.concat(directory_first_level, "1.txt"),
             self._sanitizer.concat(directory_first_level, "2.txt"),
         }
-        self.create_file_in_storage_driver(directory_second_level, "1.txt")
+        self._create_file_in_storage_driver(directory_second_level, "1.txt")
         assert len(self._storage_driver.files(directory_first_level)) == 2
         assert set(self._storage_driver.files(directory_first_level)) == {
             self._sanitizer.concat(directory_first_level, "1.txt"),
@@ -1297,7 +1297,7 @@ class AbstractStorageDriverTest(StorageDriverTest[T], ABC, EnforceOverrides, Gen
         assert len(self._storage_driver.files(directory_second_level)) == 1
         assert self._storage_driver.files(directory_second_level) == [self._sanitizer.concat(directory_second_level, "1.txt")]
         assert len(self._storage_driver.files("")) == 0
-        self.create_file_in_storage_driver("", "root.txt")
+        self._create_file_in_storage_driver("", "root.txt")
         assert len(self._storage_driver.files("")) == 1
         assert self._storage_driver.files("") == ["root.txt"]
         assert len(self._storage_driver.files("    ")) == 1
@@ -1312,8 +1312,8 @@ class AbstractStorageDriverTest(StorageDriverTest[T], ABC, EnforceOverrides, Gen
     @final
     @override
     def test_all_files__directory_is_file__then_return_collection_empty(self) -> None:
-        file_creator_data_in_root: FileCreatorData = self.create_file_in_storage_driver("", "file.txt")
-        file_creator_data_in_directory: FileCreatorData = self.create_file_in_storage_driver("directory", "file.txt")
+        file_creator_data_in_root: FileCreatorData = self._create_file_in_storage_driver("", "file.txt")
+        file_creator_data_in_directory: FileCreatorData = self._create_file_in_storage_driver("directory", "file.txt")
 
         assert self._storage_driver.exists(file_creator_data_in_root.path)
         assert self._storage_driver.exists(file_creator_data_in_directory.path)
@@ -1334,15 +1334,15 @@ class AbstractStorageDriverTest(StorageDriverTest[T], ABC, EnforceOverrides, Gen
         assert self._storage_driver.exists_directory(directory_second_level)
         assert len(self._storage_driver.all_files(directory_first_level)) == 0
 
-        self.create_file_in_storage_driver(directory_first_level, "1.txt")
+        self._create_file_in_storage_driver(directory_first_level, "1.txt")
         assert len(self._storage_driver.all_files(directory_first_level)) == 1
         assert set(self._storage_driver.all_files(directory_first_level)) == {self._sanitizer.concat(directory_first_level, "1.txt")}
 
-        self.create_file_in_storage_driver(directory_first_level, "2.txt")
+        self._create_file_in_storage_driver(directory_first_level, "2.txt")
         assert len(self._storage_driver.all_files(directory_first_level)) == 2
         assert set(self._storage_driver.all_files(directory_first_level)) == {self._sanitizer.concat(directory_first_level, "1.txt"), self._sanitizer.concat(directory_first_level, "2.txt")}
 
-        self.create_file_in_storage_driver(directory_second_level, "1.txt")
+        self._create_file_in_storage_driver(directory_second_level, "1.txt")
         assert len(self._storage_driver.all_files(directory_first_level)) == 3
         assert set(self._storage_driver.all_files(directory_first_level)) == {self._sanitizer.concat(directory_first_level, "1.txt"), self._sanitizer.concat(directory_first_level, "2.txt"), self._sanitizer.concat(directory_second_level, "1.txt")}
 
@@ -1351,7 +1351,7 @@ class AbstractStorageDriverTest(StorageDriverTest[T], ABC, EnforceOverrides, Gen
 
         assert len(self._storage_driver.all_files("")) == 3
 
-        self.create_file_in_storage_driver("", "root.txt")
+        self._create_file_in_storage_driver("", "root.txt")
 
         assert len(self._storage_driver.all_files("")) == 4
         assert set(self._storage_driver.all_files("")) == {"root.txt", self._sanitizer.concat(directory_first_level, "1.txt"), self._sanitizer.concat(directory_first_level, "2.txt"), self._sanitizer.concat(directory_second_level, "1.txt")}
@@ -1368,8 +1368,8 @@ class AbstractStorageDriverTest(StorageDriverTest[T], ABC, EnforceOverrides, Gen
     @final
     @override
     def test_directories__directory_is_file__then_return_collection_empty(self) -> None:
-        file_creator_data_in_root: FileCreatorData = self.create_file_in_storage_driver("", "file.txt")
-        file_creator_data_in_directory: FileCreatorData = self.create_file_in_storage_driver("directory", "file.txt")
+        file_creator_data_in_root: FileCreatorData = self._create_file_in_storage_driver("", "file.txt")
+        file_creator_data_in_directory: FileCreatorData = self._create_file_in_storage_driver("directory", "file.txt")
 
         assert self._storage_driver.exists(file_creator_data_in_root.path)
         assert self._storage_driver.exists(file_creator_data_in_directory.path)
@@ -1385,16 +1385,16 @@ class AbstractStorageDriverTest(StorageDriverTest[T], ABC, EnforceOverrides, Gen
         directory1_3: str = self._sanitizer.concat(directory1, "3")
         directory1_3_1: str = self._sanitizer.concat(directory1_3, "1")
 
-        self.create_directory_in_storage_driver(directory1_1)
+        self._create_directory_in_storage_driver(directory1_1)
         assert len(self._storage_driver.directories(directory1_1)) == 0
 
-        self.create_directory_in_storage_driver(directory1_2)
+        self._create_directory_in_storage_driver(directory1_2)
         assert len(self._storage_driver.directories(directory1_2)) == 0
 
-        self.create_directory_in_storage_driver(directory1_3)
+        self._create_directory_in_storage_driver(directory1_3)
         assert len(self._storage_driver.directories(directory1_3)) == 0
 
-        self.create_directory_in_storage_driver(directory1_3_1)
+        self._create_directory_in_storage_driver(directory1_3_1)
         assert len(self._storage_driver.directories(directory1)) == 3
         assert set(self._storage_driver.directories(directory1)) == {self._sanitizer.sanitize(directory1_1), self._sanitizer.sanitize(directory1_2), self._sanitizer.sanitize(directory1_3)}
 
@@ -1416,8 +1416,8 @@ class AbstractStorageDriverTest(StorageDriverTest[T], ABC, EnforceOverrides, Gen
     @final
     @override
     def test_all_directories__directory_is_file__then_return_collection_empty(self) -> None:
-        file_creator_data_in_root: FileCreatorData = self.create_file_in_storage_driver("", "file.txt")
-        file_creator_data_in_directory: FileCreatorData = self.create_file_in_storage_driver("directory", "file.txt")
+        file_creator_data_in_root: FileCreatorData = self._create_file_in_storage_driver("", "file.txt")
+        file_creator_data_in_directory: FileCreatorData = self._create_file_in_storage_driver("directory", "file.txt")
 
         assert self._storage_driver.exists(file_creator_data_in_root.path)
         assert self._storage_driver.exists(file_creator_data_in_directory.path)
@@ -1437,16 +1437,16 @@ class AbstractStorageDriverTest(StorageDriverTest[T], ABC, EnforceOverrides, Gen
         assert len(self._storage_driver.all_directories("")) == 0
         assert len(self._storage_driver.all_directories("    ")) == 0
 
-        self.create_directory_in_storage_driver(directory1_1)
+        self._create_directory_in_storage_driver(directory1_1)
         assert len(self._storage_driver.all_directories(directory1_1)) == 0
 
-        self.create_directory_in_storage_driver(directory1_2)
+        self._create_directory_in_storage_driver(directory1_2)
         assert len(self._storage_driver.all_directories(directory1_2)) == 0
 
-        self.create_directory_in_storage_driver(directory1_3)
+        self._create_directory_in_storage_driver(directory1_3)
         assert len(self._storage_driver.all_directories(directory1_3)) == 0
 
-        self.create_directory_in_storage_driver(directory1_3_1)
+        self._create_directory_in_storage_driver(directory1_3_1)
         assert len(self._storage_driver.all_directories(directory1)) == 4
         assert set(self._storage_driver.all_directories(directory1)) == {self._sanitizer.sanitize(directory1_1), self._sanitizer.sanitize(directory1_2), self._sanitizer.sanitize(directory1_3), self._sanitizer.sanitize(directory1_3_1)}
 
@@ -1468,8 +1468,8 @@ class AbstractStorageDriverTest(StorageDriverTest[T], ABC, EnforceOverrides, Gen
     @final
     @override
     def test_exists_directory__directory_is_file__then_return_false(self) -> None:
-        file_creator_data_in_root: FileCreatorData = self.create_file_in_storage_driver("", "file.txt")
-        file_creator_data_in_directory: FileCreatorData = self.create_file_in_storage_driver("directory", "file.txt")
+        file_creator_data_in_root: FileCreatorData = self._create_file_in_storage_driver("", "file.txt")
+        file_creator_data_in_directory: FileCreatorData = self._create_file_in_storage_driver("directory", "file.txt")
 
         assert self._storage_driver.exists(file_creator_data_in_root.path)
         assert self._storage_driver.exists(file_creator_data_in_directory.path)
@@ -1505,8 +1505,8 @@ class AbstractStorageDriverTest(StorageDriverTest[T], ABC, EnforceOverrides, Gen
     @final
     @override
     def test_copy_directory__source_is_file__then_return_false(self) -> None:
-        file_creator_data: FileCreatorData = self.create_file_in_storage_driver("directory1", "file.txt")
-        directory: str = self.create_directory_in_storage_driver("directory2")
+        file_creator_data: FileCreatorData = self._create_file_in_storage_driver("directory1", "file.txt")
+        directory: str = self._create_directory_in_storage_driver("directory2")
 
         assert self._storage_driver.exists(file_creator_data.path)
         assert self._storage_driver.exists_directory(directory)
@@ -1558,8 +1558,8 @@ class AbstractStorageDriverTest(StorageDriverTest[T], ABC, EnforceOverrides, Gen
     @final
     @override
     def test_copy_directory__target_is_file__then_return_false(self) -> None:
-        file_creator_data: FileCreatorData = self.create_file_in_storage_driver("", "file.txt")
-        directory: str = self.create_directory_in_storage_driver("directory")
+        file_creator_data: FileCreatorData = self._create_file_in_storage_driver("", "file.txt")
+        directory: str = self._create_directory_in_storage_driver("directory")
 
         assert self._storage_driver.exists(file_creator_data.path)
         assert self._storage_driver.exists_directory(directory)
@@ -1576,9 +1576,9 @@ class AbstractStorageDriverTest(StorageDriverTest[T], ABC, EnforceOverrides, Gen
         file1: str = "file1.txt"
         file2: str = "file2.txt"
         file3: str = "file3.txt"
-        content1: str = self.create_string()
-        content2: str = self.create_string()
-        content3: str = self.create_string()
+        content1: str = self._create_string()
+        content2: str = self._create_string()
+        content3: str = self._create_string()
 
         self._storage_driver.put_file_as(content1.encode("UTF-8"), self._sanitizer.concat(directory1_1_1, file1))
         self._storage_driver.put_file_as(content2.encode("UTF-8"), self._sanitizer.concat(directory1_1_2, file2))
@@ -1614,9 +1614,9 @@ class AbstractStorageDriverTest(StorageDriverTest[T], ABC, EnforceOverrides, Gen
         file1: str = "file1.txt"
         file2: str = "file2.txt"
         file3: str = "file3.txt"
-        content1: str = self.create_string()
-        content2: str = self.create_string()
-        content3: str = self.create_string()
+        content1: str = self._create_string()
+        content2: str = self._create_string()
+        content3: str = self._create_string()
 
         self._storage_driver.put_file_as(content1.encode("UTF-8"), self._sanitizer.concat(directory1_1_1, file1))
         self._storage_driver.put_file_as(content2.encode("UTF-8"), self._sanitizer.concat(directory1_1_2, file2))
@@ -1662,9 +1662,9 @@ class AbstractStorageDriverTest(StorageDriverTest[T], ABC, EnforceOverrides, Gen
         file1: str = "file1.txt"
         file2: str = "file2.txt"
         file3: str = "file3.txt"
-        content1: str = self.create_string()
-        content2: str = self.create_string()
-        content3: str = self.create_string()
+        content1: str = self._create_string()
+        content2: str = self._create_string()
+        content3: str = self._create_string()
 
         self._storage_driver.put_file_as(content1.encode("UTF-8"), self._sanitizer.concat(directory1_1_1, file1))
         self._storage_driver.put_file_as(content2.encode("UTF-8"), self._sanitizer.concat(directory1_1_2, file2))
@@ -1706,9 +1706,9 @@ class AbstractStorageDriverTest(StorageDriverTest[T], ABC, EnforceOverrides, Gen
         file1: str = "file1.txt"
         file2: str = "file2.txt"
         file3: str = "file3.txt"
-        content1: str = self.create_string()
-        content2: str = self.create_string()
-        content3: str = self.create_string()
+        content1: str = self._create_string()
+        content2: str = self._create_string()
+        content3: str = self._create_string()
 
         self._storage_driver.put_file_as(content1.encode("UTF-8"), self._sanitizer.concat(directory1_1_1, file1))
         self._storage_driver.put_file_as(content2.encode("UTF-8"), self._sanitizer.concat(directory1_1_2, file2))
@@ -1789,8 +1789,8 @@ class AbstractStorageDriverTest(StorageDriverTest[T], ABC, EnforceOverrides, Gen
     @override
     def test_copy_directory__another_storage_driver__target_is_file__then_return_false(self) -> None:
         with self._create_storage_driver_secondary() as target_storage_driver:
-            file_creator_data: FileCreatorData = self.create_file_in_storage_driver("", "file.txt", target_storage_driver)
-            directory: str = self.create_directory_in_storage_driver("directory")
+            file_creator_data: FileCreatorData = self._create_file_in_storage_driver("", "file.txt", target_storage_driver)
+            directory: str = self._create_directory_in_storage_driver("directory")
 
             assert target_storage_driver.exists(file_creator_data.path)
             assert self._storage_driver.exists_directory(directory)
@@ -1808,9 +1808,9 @@ class AbstractStorageDriverTest(StorageDriverTest[T], ABC, EnforceOverrides, Gen
             file1: str = "file1.txt"
             file2: str = "file2.txt"
             file3: str = "file3.txt"
-            content1: str = self.create_string()
-            content2: str = self.create_string()
-            content3: str = self.create_string()
+            content1: str = self._create_string()
+            content2: str = self._create_string()
+            content3: str = self._create_string()
 
             self._storage_driver.put_file_as(content1.encode("UTF-8"), self._sanitizer.concat(directory1_1_1, file1))
             self._storage_driver.put_file_as(content2.encode("UTF-8"), self._sanitizer.concat(directory1_1_2, file2))
@@ -1849,9 +1849,9 @@ class AbstractStorageDriverTest(StorageDriverTest[T], ABC, EnforceOverrides, Gen
             file1: str = "file1.txt"
             file2: str = "file2.txt"
             file3: str = "file3.txt"
-            content1: str = self.create_string()
-            content2: str = self.create_string()
-            content3: str = self.create_string()
+            content1: str = self._create_string()
+            content2: str = self._create_string()
+            content3: str = self._create_string()
 
             self._storage_driver.put_file_as(content1.encode("UTF-8"), self._sanitizer.concat(directory1_1_1, file1))
             self._storage_driver.put_file_as(content2.encode("UTF-8"), self._sanitizer.concat(directory1_1_2, file2))
@@ -1903,9 +1903,9 @@ class AbstractStorageDriverTest(StorageDriverTest[T], ABC, EnforceOverrides, Gen
             file1: str = "file1.txt"
             file2: str = "file2.txt"
             file3: str = "file3.txt"
-            content1: str = self.create_string()
-            content2: str = self.create_string()
-            content3: str = self.create_string()
+            content1: str = self._create_string()
+            content2: str = self._create_string()
+            content3: str = self._create_string()
 
             self._storage_driver.put_file_as(content1.encode("UTF-8"), self._sanitizer.concat(directory1_1_1, file1))
             self._storage_driver.put_file_as(content2.encode("UTF-8"), self._sanitizer.concat(directory1_1_2, file2))
@@ -1950,9 +1950,9 @@ class AbstractStorageDriverTest(StorageDriverTest[T], ABC, EnforceOverrides, Gen
             file1: str = "file1.txt"
             file2: str = "file2.txt"
             file3: str = "file3.txt"
-            content1: str = self.create_string()
-            content2: str = self.create_string()
-            content3: str = self.create_string()
+            content1: str = self._create_string()
+            content2: str = self._create_string()
+            content3: str = self._create_string()
 
             self._storage_driver.put_file_as(content1.encode("UTF-8"), self._sanitizer.concat(directory1_1_1, file1))
             self._storage_driver.put_file_as(content2.encode("UTF-8"), self._sanitizer.concat(directory1_1_2, file2))
@@ -1996,8 +1996,8 @@ class AbstractStorageDriverTest(StorageDriverTest[T], ABC, EnforceOverrides, Gen
     @final
     @override
     def test_move_directory__source_is_file__then_return_false(self) -> None:
-        file_creator_data: 'FileCreatorData' = self.create_file_in_storage_driver("directory1", "file.txt")
-        directory: str = self.create_directory_in_storage_driver("directory2")
+        file_creator_data: 'FileCreatorData' = self._create_file_in_storage_driver("directory1", "file.txt")
+        directory: str = self._create_directory_in_storage_driver("directory2")
 
         assert self._storage_driver.exists(file_creator_data.path)
         assert self._storage_driver.exists_directory(directory)
@@ -2049,8 +2049,8 @@ class AbstractStorageDriverTest(StorageDriverTest[T], ABC, EnforceOverrides, Gen
     @final
     @override
     def test_move_directory__target_is_file__then_return_false(self) -> None:
-        file_creator_data: FileCreatorData = self.create_file_in_storage_driver("", "file.txt")
-        directory: str = self.create_directory_in_storage_driver("directory")
+        file_creator_data: FileCreatorData = self._create_file_in_storage_driver("", "file.txt")
+        directory: str = self._create_directory_in_storage_driver("directory")
         assert self._storage_driver.exists(file_creator_data.path)
         assert self._storage_driver.exists_directory(directory)
         assert not self._storage_driver.move_directory(directory, file_creator_data.path)
@@ -2066,9 +2066,9 @@ class AbstractStorageDriverTest(StorageDriverTest[T], ABC, EnforceOverrides, Gen
         file1 = "file1.txt"
         file2 = "file2.txt"
         file3 = "file3.txt"
-        content1: str = self.create_string()
-        content2: str = self.create_string()
-        content3: str = self.create_string()
+        content1: str = self._create_string()
+        content2: str = self._create_string()
+        content3: str = self._create_string()
         self._storage_driver.put_file_as(content1.encode("UTF-8"), self._sanitizer.concat(directory1_1_1, file1))
         self._storage_driver.put_file_as(content2.encode("UTF-8"), self._sanitizer.concat(directory1_1_2, file2))
         self._storage_driver.put_file_as(content3.encode("UTF-8"), file3)
@@ -2086,9 +2086,9 @@ class AbstractStorageDriverTest(StorageDriverTest[T], ABC, EnforceOverrides, Gen
         file1 = "file1.txt"
         file2 = "file2.txt"
         file3 = "file3.txt"
-        content1: str = self.create_string()
-        content2: str = self.create_string()
-        content3: str = self.create_string()
+        content1: str = self._create_string()
+        content2: str = self._create_string()
+        content3: str = self._create_string()
         self._storage_driver.put_file_as(content1.encode("UTF-8"), self._sanitizer.concat(directory1_1_1, file1))
         self._storage_driver.put_file_as(content2.encode("UTF-8"), self._sanitizer.concat(directory1_1_2, file2))
         self._storage_driver.put_file_as(content3.encode("UTF-8"), file3)
@@ -2126,9 +2126,9 @@ class AbstractStorageDriverTest(StorageDriverTest[T], ABC, EnforceOverrides, Gen
         file1 = "file1.txt"
         file2 = "file2.txt"
         file3 = "file3.txt"
-        content1: str = self.create_string()
-        content2: str = self.create_string()
-        content3: str = self.create_string()
+        content1: str = self._create_string()
+        content2: str = self._create_string()
+        content3: str = self._create_string()
         self._storage_driver.put_file_as(content1.encode("UTF-8"), self._sanitizer.concat(directory1_1_1, file1))
         self._storage_driver.put_file_as(content2.encode("UTF-8"), self._sanitizer.concat(directory1_1_2, file2))
         self._storage_driver.put_file_as(content3.encode("UTF-8"), file3)
@@ -2169,9 +2169,9 @@ class AbstractStorageDriverTest(StorageDriverTest[T], ABC, EnforceOverrides, Gen
         file1 = "file1.txt"
         file2 = "file2.txt"
         file3 = "file3.txt"
-        content1: str = self.create_string()
-        content2: str = self.create_string()
-        content3: str = self.create_string()
+        content1: str = self._create_string()
+        content2: str = self._create_string()
+        content3: str = self._create_string()
         self._storage_driver.put_file_as(content1.encode("UTF-8"), self._sanitizer.concat(directory1_1_1, file1))
         self._storage_driver.put_file_as(content2.encode("UTF-8"), self._sanitizer.concat(directory1_1_2, file2))
         self._storage_driver.put_file_as(content3.encode("UTF-8"), self._sanitizer.concat(directory2_1_1, file1))
@@ -2251,8 +2251,8 @@ class AbstractStorageDriverTest(StorageDriverTest[T], ABC, EnforceOverrides, Gen
     @override
     def test_move_directory__another_storage_driver__target_is_file__then_return_false(self) -> None:
         with self._create_storage_driver_secondary() as target_storage_driver:
-            file_creator_data: FileCreatorData = self.create_file_in_storage_driver("", "file.txt", target_storage_driver)
-            directory = self.create_directory_in_storage_driver("directory")
+            file_creator_data: FileCreatorData = self._create_file_in_storage_driver("", "file.txt", target_storage_driver)
+            directory = self._create_directory_in_storage_driver("directory")
             assert target_storage_driver.exists(file_creator_data.path)
             assert self._storage_driver.exists_directory(directory)
             assert not self._storage_driver.move_directory(directory, file_creator_data.path, target_storage_driver)
@@ -2269,9 +2269,9 @@ class AbstractStorageDriverTest(StorageDriverTest[T], ABC, EnforceOverrides, Gen
             file1 = "file1.txt"
             file2 = "file2.txt"
             file3 = "file3.txt"
-            content1: str = self.create_string()
-            content2: str = self.create_string()
-            content3: str = self.create_string()
+            content1: str = self._create_string()
+            content2: str = self._create_string()
+            content3: str = self._create_string()
 
             self._storage_driver.put_file_as(content1.encode("UTF-8"), self._sanitizer.concat(directory1_1_1, file1))
             self._storage_driver.put_file_as(content2.encode("UTF-8"), self._sanitizer.concat(directory1_1_2, file2))
@@ -2310,9 +2310,9 @@ class AbstractStorageDriverTest(StorageDriverTest[T], ABC, EnforceOverrides, Gen
             file1 = "file1.txt"
             file2 = "file2.txt"
             file3 = "file3.txt"
-            content1: str = self.create_string()
-            content2: str = self.create_string()
-            content3: str = self.create_string()
+            content1: str = self._create_string()
+            content2: str = self._create_string()
+            content3: str = self._create_string()
 
             self._storage_driver.put_file_as(content1.encode("UTF-8"), self._sanitizer.concat(directory1_1_1, file1))
             self._storage_driver.put_file_as(content2.encode("UTF-8"), self._sanitizer.concat(directory1_1_2, file2))
@@ -2352,9 +2352,9 @@ class AbstractStorageDriverTest(StorageDriverTest[T], ABC, EnforceOverrides, Gen
             file1 = "file1.txt"
             file2 = "file2.txt"
             file3 = "file3.txt"
-            content1: str = self.create_string()
-            content2: str = self.create_string()
-            content3: str = self.create_string()
+            content1: str = self._create_string()
+            content2: str = self._create_string()
+            content3: str = self._create_string()
 
             self._storage_driver.put_file_as(content1.encode("UTF-8"), self._sanitizer.concat(directory1_1_1, file1))
             self._storage_driver.put_file_as(content2.encode("UTF-8"), self._sanitizer.concat(directory1_1_2, file2))
@@ -2400,9 +2400,9 @@ class AbstractStorageDriverTest(StorageDriverTest[T], ABC, EnforceOverrides, Gen
             file1 = "file1.txt"
             file2 = "file2.txt"
             file3 = "file3.txt"
-            content1: str = self.create_string()
-            content2: str = self.create_string()
-            content3: str = self.create_string()
+            content1: str = self._create_string()
+            content2: str = self._create_string()
+            content3: str = self._create_string()
 
             self._storage_driver.put_file_as(content1.encode("UTF-8"), self._sanitizer.concat(directory1_1_1, file1))
             self._storage_driver.put_file_as(content2.encode("UTF-8"), self._sanitizer.concat(directory1_1_2, file2))
@@ -2473,7 +2473,7 @@ class AbstractStorageDriverTest(StorageDriverTest[T], ABC, EnforceOverrides, Gen
     @final
     @override
     def test_make_directory__directory_is_file__then_return_false(self) -> None:
-        file_creator_data: FileCreatorData = self.create_file_in_storage_driver("directory", "file.txt")
+        file_creator_data: FileCreatorData = self._create_file_in_storage_driver("directory", "file.txt")
         assert self._storage_driver.exists(file_creator_data.path)
         assert not self._storage_driver.exists_directory(file_creator_data.path)
         assert not self._storage_driver.make_directory(file_creator_data.path)
@@ -2493,8 +2493,8 @@ class AbstractStorageDriverTest(StorageDriverTest[T], ABC, EnforceOverrides, Gen
     @final
     @override
     def test_delete_directory__directory_is_file__then_return_false(self) -> None:
-        file_creator_data_in_root: FileCreatorData = self.create_file_in_storage_driver("", "file.txt")
-        file_creator_data_in_directory: FileCreatorData = self.create_file_in_storage_driver("directory", "file.txt")
+        file_creator_data_in_root: FileCreatorData = self._create_file_in_storage_driver("", "file.txt")
+        file_creator_data_in_directory: FileCreatorData = self._create_file_in_storage_driver("directory", "file.txt")
         assert self._storage_driver.exists(file_creator_data_in_root.path)
         assert self._storage_driver.exists(file_creator_data_in_directory.path)
         assert not self._storage_driver.delete_directory(file_creator_data_in_root.path)
@@ -2517,8 +2517,8 @@ class AbstractStorageDriverTest(StorageDriverTest[T], ABC, EnforceOverrides, Gen
     @final
     @override
     def test_delete_directory__directory_has_file__then_return_true(self) -> None:
-        file_creator_data1: FileCreatorData = self.create_file_in_storage_driver("directory", "file1.txt")
-        file_creator_data2: FileCreatorData = self.create_file_in_storage_driver("directory", "file2.txt")
+        file_creator_data1: FileCreatorData = self._create_file_in_storage_driver("directory", "file1.txt")
+        file_creator_data2: FileCreatorData = self._create_file_in_storage_driver("directory", "file2.txt")
 
         assert self._storage_driver.exists(file_creator_data1.path)
         assert self._storage_driver.exists(file_creator_data2.path)
@@ -2532,10 +2532,10 @@ class AbstractStorageDriverTest(StorageDriverTest[T], ABC, EnforceOverrides, Gen
     @final
     @override
     def test_delete_directory__directory_has_directories_and_files__then_return_true(self) -> None:
-        file_creator_data1: FileCreatorData = self.create_file_in_storage_driver("directory1", "file1.txt")
-        file_creator_data2: FileCreatorData = self.create_file_in_storage_driver("directory1", "file2.txt")
-        file_creator_data3: FileCreatorData = self.create_file_in_storage_driver("directory1/directory2", "file3.txt")
-        file_creator_data4: FileCreatorData = self.create_file_in_storage_driver("directory1/directory3", "file4.txt")
+        file_creator_data1: FileCreatorData = self._create_file_in_storage_driver("directory1", "file1.txt")
+        file_creator_data2: FileCreatorData = self._create_file_in_storage_driver("directory1", "file2.txt")
+        file_creator_data3: FileCreatorData = self._create_file_in_storage_driver("directory1/directory2", "file3.txt")
+        file_creator_data4: FileCreatorData = self._create_file_in_storage_driver("directory1/directory3", "file4.txt")
 
         assert self._storage_driver.exists(file_creator_data1.path)
         assert self._storage_driver.exists(file_creator_data2.path)
@@ -2577,8 +2577,8 @@ class AbstractStorageDriverTest(StorageDriverTest[T], ABC, EnforceOverrides, Gen
     @final
     @override
     def test_rename_directory__source_is_file__then_return_false(self) -> None:
-        root_creator_data: FileCreatorData = self.create_file_in_storage_driver("", "root.txt")
-        directory_creator_data: FileCreatorData = self.create_file_in_storage_driver("directory", "directory.txt")
+        root_creator_data: FileCreatorData = self._create_file_in_storage_driver("", "root.txt")
+        directory_creator_data: FileCreatorData = self._create_file_in_storage_driver("directory", "directory.txt")
 
         assert self._storage_driver.exists(root_creator_data.path)
         assert self._storage_driver.exists(directory_creator_data.path)
@@ -2608,7 +2608,7 @@ class AbstractStorageDriverTest(StorageDriverTest[T], ABC, EnforceOverrides, Gen
     @final
     @override
     def test_rename_directory__target_is_file__then_return_false(self) -> None:
-        file_creator_data: FileCreatorData = self.create_file_in_storage_driver("rename", "file.txt")
+        file_creator_data: FileCreatorData = self._create_file_in_storage_driver("rename", "file.txt")
 
         assert self._storage_driver.make_directory("directory")
         assert self._storage_driver.exists_directory("directory")
@@ -2617,7 +2617,7 @@ class AbstractStorageDriverTest(StorageDriverTest[T], ABC, EnforceOverrides, Gen
     @final
     @override
     def test_rename_directory__source_exists_and_target_not_exists__then_return_true(self) -> None:
-        self.create_file_in_storage_driver("directory", "file.txt")
+        self._create_file_in_storage_driver("directory", "file.txt")
 
         assert self._storage_driver.make_directory("root")
         assert self._storage_driver.exists_directory("root")
@@ -2648,7 +2648,7 @@ class AbstractStorageDriverTest(StorageDriverTest[T], ABC, EnforceOverrides, Gen
     def test_get_metadata__from_file__then_return_optional_metadata(self) -> None:
         directory = "directory"
         file = "file.txt"
-        content: str = self.create_string(1000)
+        content: str = self._create_string(1000)
         self._storage_driver.put_file_as(content.encode("UTF-8"), self._sanitizer.concat(directory, file))
         metadata: Optional[Metadata] = self._storage_driver.get_metadata(self._sanitizer.concat(directory, file))
 
@@ -2670,7 +2670,7 @@ class AbstractStorageDriverTest(StorageDriverTest[T], ABC, EnforceOverrides, Gen
         file1 = "file1.txt"
         file2 = "file2.txt"
         file3 = "file3.txt"
-        content: str = self.create_string(1000)
+        content: str = self._create_string(1000)
 
         assert self._storage_driver.put_file_as(content.encode("UTF-8"), self._sanitizer.concat(directory, file1))
         assert self._storage_driver.put_file_as(content.encode("UTF-8"), self._sanitizer.concat(directory, file2))
@@ -2696,7 +2696,7 @@ class AbstractStorageDriverTest(StorageDriverTest[T], ABC, EnforceOverrides, Gen
         file1 = "file1.txt"
         file2 = "file2.txt"
         file3 = "file3.txt"
-        content: str = self.create_string(1000)
+        content: str = self._create_string(1000)
 
         assert self._storage_driver.put_file_as(content.encode("UTF-8"), self._sanitizer.concat(directory, file1))
         assert self._storage_driver.put_file_as(content.encode("UTF-8"), self._sanitizer.concat(directory, file2))

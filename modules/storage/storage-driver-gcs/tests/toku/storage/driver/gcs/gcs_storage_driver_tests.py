@@ -13,7 +13,7 @@ All rights reserved.
 
 This software is provided for internal use only and may not be
 distributed, reproduced, or disclosed to any third party without
-prior written permission from Your Company Name.
+prior written permission from Toku.
 
 Module: gcs_storage_driver_tests.py
 Author: Toku Dev
@@ -80,7 +80,7 @@ class GcsStorageDriverTests(AbstractStorageDriverTest[GcsStorageDriver]):
         self._storage.close()
 
     @override
-    def initialize_test(self) -> None:
+    def _initialize_test(self) -> None:
         self._working_directory_primary_storage_driver: str = self._create_directory_path_in_root()
         self._working_directory_secondary_storage_driver: str = self._create_directory_path_in_root()
 
@@ -88,7 +88,7 @@ class GcsStorageDriverTests(AbstractStorageDriverTest[GcsStorageDriver]):
         self._make_directory(self._working_directory_secondary_storage_driver)
 
     @override
-    def teardown_test(self) -> None:
+    def _teardown_test(self) -> None:
         pass  # not needed
 
     @override
@@ -128,7 +128,7 @@ class GcsStorageDriverTests(AbstractStorageDriverTest[GcsStorageDriver]):
         storage_driver.open()
 
     @override
-    def test_open__unsuccessful_driver_initialization__then_return_void(self) -> None:
+    def test_open__unsuccessful_driver_initialization__then_raise_exception(self) -> None:
         storage_driver = GcsStorageDriver(
             self._working_directory_secondary_storage_driver,
             f"invalid-project-{str(uuid.uuid4())}",
@@ -166,7 +166,3 @@ class GcsStorageDriverTests(AbstractStorageDriverTest[GcsStorageDriver]):
         )
         storage_driver.open()
         storage_driver.close()
-
-    @override
-    def test_close__unsuccessful_driver_completion__then_return_void(self) -> None:
-        pass  # there is not test cases to verify here

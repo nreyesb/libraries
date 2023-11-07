@@ -7,7 +7,7 @@ All rights reserved.
 
 This software is provided for internal use only and may not be
 distributed, reproduced, or disclosed to any third party without
-prior written permission from Your Company Name.
+prior written permission from Toku.
 
 Module: storage_driver.py
 Author: Toku Dev
@@ -47,8 +47,8 @@ class Size:
     Provides the size of a file and the converter to human-readable.
     """
 
-    length: int
-    human_readable: str
+    length: int  # the length of a file in bytes
+    human_readable: str  # the length as human readable format
 
     def __init__(self, length: int) -> None:
         """
@@ -65,13 +65,13 @@ class Metadata:
     """
 
     size: Size
-    creation_time: int
-    last_modified: int
-    last_access_time: int
-    is_file: bool
-    is_directory: bool
-    is_symbolic_link: bool
-    media_type: str
+    creation_time: int  # the creatime time date as integer
+    last_modified: int  # the last modified date as integer
+    last_access_time: int  # the last access date as integer
+    is_file: bool  # indicates if it's a file
+    is_directory: bool  # indicates if it's a directory
+    is_symbolic_link: bool  # indicates if it's a symbolik link
+    media_type: str  # the media type of the file
 
     @staticmethod
     def detect_media_type(path: str) -> str:

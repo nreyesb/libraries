@@ -17,9 +17,18 @@
     },
     {
       "path": "modules/storage/storage-driver-local"
-    },"
+    },
     {
       "path": "modules/storage/storage-driver-gcs"
+    },
+    {
+      "path": "modules/storage/storage-url-api"
+    },
+    {
+      "path": "modules/storage/storage-url-core"
+    },
+    {
+      "path": "modules/storage/storage-url-verifier"
     }
   ],
   "settings": {

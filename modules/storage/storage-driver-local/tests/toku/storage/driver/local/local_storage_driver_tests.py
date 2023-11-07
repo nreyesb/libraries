@@ -13,7 +13,7 @@ All rights reserved.
 
 This software is provided for internal use only and may not be
 distributed, reproduced, or disclosed to any third party without
-prior written permission from Your Company Name.
+prior written permission from Toku.
 
 Module: local_storage_driver_tests.py
 Author: Toku Dev
@@ -34,12 +34,12 @@ class LocalStorageDriverTests(AbstractStorageDriverTest[LocalStorageDriver]):
     """
 
     @override
-    def initialize_test(self) -> None:
+    def _initialize_test(self) -> None:
         self._working_directory_primary_storage_driver: str = self._create_working_directory()
         self._working_directory_secondary_storage_driver: str = self._create_working_directory()
 
     @override
-    def teardown_test(self) -> None:
+    def _teardown_test(self) -> None:
         pass  # not needed
 
     @override
@@ -62,7 +62,7 @@ class LocalStorageDriverTests(AbstractStorageDriverTest[LocalStorageDriver]):
         storage_driver.open()
 
     @override
-    def test_open__unsuccessful_driver_initialization__then_return_void(self) -> None:
+    def test_open__unsuccessful_driver_initialization__then_raise_exception(self) -> None:
         root: str = os.path.join("/c", str(uuid.uuid4()))
         storage_driver = LocalStorageDriver(root)
         assert not os.path.exists(root)
@@ -76,7 +76,3 @@ class LocalStorageDriverTests(AbstractStorageDriverTest[LocalStorageDriver]):
         storage_driver = LocalStorageDriver(self._tempdir.name)
         storage_driver.open()
         storage_driver.close()
-
-    @override
-    def test_close__unsuccessful_driver_completion__then_return_void(self) -> None:
-        pass  # there is not test cases to verify here

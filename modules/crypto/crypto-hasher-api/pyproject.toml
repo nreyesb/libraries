@@ -24,7 +24,7 @@ packages = [
 ]
 
 [tool.poetry.dependencies]
-python = "~3.11"
+python = "^3.11"
 overrides = "^7.4.0"
 
 
