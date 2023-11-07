@@ -1,0 +1,46 @@
+[tool.poetry]
+name = "toku-storage-url-core"
+version = "0.1.0"
+description = "Project that provides the core for operating with storage url"
+license = "Internal"
+authors = [
+    "Toku Dev <dev@trytoku.com>"
+]
+maintainers = [
+    "Toku Dev <dev@trytoku.com>"
+]
+readme = "README.md"
+homepage = "https://www.jira.com"
+repository = "https://www.github.com"
+documentation = "https://www.notion.com"
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Software Development :: Libraries"
+]
+packages = [
+    {include = "toku"},
+    {include = "tests"}
+]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+overrides = "^7.4.0"
+
+
+[tool.poetry.group.dev.dependencies]
+pylint = "^3.0.1"
+flake8 = "^6.1.0"
+mypy = "^1.5.1"
+black = "^23.9.1"
+
+[tool.poetry.group.test.dependencies]
+pytest = "^7.4.2"
+pytest-cov = "^4.1.0"
+pytest-xdist = "^3.3.1"
+flexmock = "^0.11.3"
+faker = "^19.11.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
