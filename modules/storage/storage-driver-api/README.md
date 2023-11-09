@@ -38,7 +38,7 @@ To use the library, you can import it in your Python code:
 from toku.storage.driver.api import StorageDriver  # not needed, just to show the type of class to use
 
 with create_concrete_implementation() as storage_driver:
-    file = "data.text"
+    file = "data.txt"
     content = "i'm the content"
 
     if not storage_driver.exists(file)
@@ -124,7 +124,6 @@ Refers to **pyproject.toml** for information about:
 
 - License
 - Authors
-- Maintainers
 - References and Resources
     - Homepage
     - Documentation

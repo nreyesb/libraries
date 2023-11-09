@@ -157,7 +157,6 @@ Refers to **pyproject.toml** for information about:
 
 - License
 - Authors
-- Maintainers
 - References and Resources
     - Homepage
     - Documentation

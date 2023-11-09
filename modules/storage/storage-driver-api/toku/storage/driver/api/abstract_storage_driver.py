@@ -10,7 +10,7 @@ distributed, reproduced, or disclosed to any third party without
 prior written permission from Toku.
 
 Module: abstract_storage_driver.py
-Author: Toku Dev
+Author: Toku
 """
 import uuid
 from typing import Callable, Optional

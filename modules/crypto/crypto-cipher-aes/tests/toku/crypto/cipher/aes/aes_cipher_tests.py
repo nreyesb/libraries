@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 # flake8: noqa: E501
+# pylint: disable=missing-class-docstring
 # pylint: disable=missing-function-docstring
 # pylint: disable=empty-docstring
 # pylint: disable=line-too-long
@@ -16,7 +17,7 @@ distributed, reproduced, or disclosed to any third party without
 prior written permission from Toku.
 
 Module: aes_cipher_tests.py
-Author: Toku Dev
+Author: Toku
 """
 from overrides import override
 from tests.toku.crypto.cipher.api import CipherTest

@@ -64,7 +64,7 @@ with GcsStorageDriver(
     bucket_name="bucket_name_asd7",
     credentials_file="/c/user/home/sa_account.json"
 ) as storage_driver:
-    file = "data.text"
+    file = "data.txt"
     content = "i'm the content"
 
     if not storage_driver.exists(file)
@@ -136,7 +136,6 @@ Refers to **pyproject.toml** for information about:
 
 - License
 - Authors
-- Maintainers
 - References and Resources
     - Homepage
     - Documentation

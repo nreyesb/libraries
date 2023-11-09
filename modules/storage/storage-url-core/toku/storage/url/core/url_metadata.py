@@ -10,10 +10,10 @@ distributed, reproduced, or disclosed to any third party without
 prior written permission from Toku.
 
 Module: url_metadata.py
-Author: Toku Dev
+Author: Toku
 """
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import datetime, timezone, timedelta
 from enum import Enum
 import os
 from typing import Dict, Self
@@ -22,49 +22,51 @@ import uuid
 
 class DateTime:
     """
-    Provides utilities processes for date
+    Provides a wrapper for datetime to work in UTC timezone.
     """
+
+    DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S.%f %Z"
 
     def __init__(self, date_time: datetime) -> None:
         """
         Create a new datetime.
 
+        By default, the process always uses UTC timezone.
+
         Args:
             date_time (datetime): The datetime.
         """
-        self._datetime: datetime = date_time
+        self._datetime: datetime = date_time.replace(tzinfo=timezone.utc)
 
     @staticmethod
-    def create(date_time: datetime = datetime.utcnow()) -> 'DateTime':
+    def create(date_time: datetime = datetime.now(timezone.utc)) -> 'DateTime':
         """
         Create a new DateTime.
 
-        Args:
-            date_time (datetime, optional): The datetime. Defaults to datetime.utcnow().
+        See __init__(...)
 
-        Returns:
+        Args:
+            date_time (datetime, optional): The datetime. Defaults to datetime.now(timezone.utc)).
+
+        Returns:date
             DateTime: The new DateTime.
         """
         return DateTime(date_time)
 
     @staticmethod
-    def from_millis(millis: int) -> 'DateTime':
+    def parse(date_time: str) -> 'DateTime':
         """
-        Return a DateTime.
+        Parse the `date_time` with the following format '%Y-%m-%d %H:%M:%S.%f %Z',
+
+        For example: 2023-11-07 11:45.42 UTC
+
+        See __init__(...)
 
         Returns:
             DateTime: The new DateTime.
         """
-        return DateTime(datetime.fromtimestamp(millis / 1000))
-
-    def get(self) -> datetime:
-        """
-        The internal datetime.
-
-        Returns:
-            datetime: The internal datetime.
-        """
-        return self._datetime
+        datetime_utc: datetime = datetime.strptime(date_time, DateTime.DATETIME_FORMAT)
+        return DateTime(datetime_utc)
 
     def delta(self, delta: timedelta) -> Self:
         """
@@ -87,6 +89,15 @@ class DateTime:
             int: datetime as millis.
         """
         return int(self._datetime.timestamp() * 1000)
+
+    def to_string(self) -> str:
+        """
+        Return the datetime as string.
+
+        Returns:
+            str: datetime as string.
+        """
+        return self._datetime.strftime(DateTime.DATETIME_FORMAT)
 
 
 class Classification(Enum):
@@ -124,8 +135,8 @@ class DateTimeCondition:
     Provides the conditions for the lifespan of data access
     """
 
-    access_from: int = 0  # UTC time in millis (start access). Default 0 infinite.
-    access_until: int = 0  # UTC time in millis (ends access). Default 0 infinite.
+    access_from: str = ""  # UTC time. Default None infinite.
+    access_until: str = ""  # UTC time. Default None infinite.
 
 
 @dataclass

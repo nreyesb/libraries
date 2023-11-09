@@ -10,7 +10,7 @@ distributed, reproduced, or disclosed to any third party without
 prior written permission from Toku.
 
 Module: url_streaming.py
-Author: Toku Dev
+Author: Toku
 """
 from dataclasses import dataclass
 from io import BufferedReader

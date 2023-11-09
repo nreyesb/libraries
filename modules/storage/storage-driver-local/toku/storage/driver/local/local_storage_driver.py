@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# pylint: disable=missing-class-docstring
 # pylint: disable=missing-function-docstring
 """
 Private License - For Internal Use Only
@@ -11,7 +12,7 @@ distributed, reproduced, or disclosed to any third party without
 prior written permission from Toku.
 
 Module: local_storage_driver.py
-Author: Toku Dev
+Author: Toku
 """
 import glob
 from io import BufferedReader

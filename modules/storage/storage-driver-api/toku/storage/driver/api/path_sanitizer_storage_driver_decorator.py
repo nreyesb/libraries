@@ -10,7 +10,7 @@ distributed, reproduced, or disclosed to any third party without
 prior written permission from Toku.
 
 Module: path_sanitizer_storage_driver_decorator.py
-Author: Toku Dev
+Author: Toku
 """
 from io import BufferedReader
 from typing import Optional, final

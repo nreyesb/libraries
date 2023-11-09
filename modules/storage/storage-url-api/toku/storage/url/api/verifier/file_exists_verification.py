@@ -9,8 +9,8 @@ This software is provided for internal use only and may not be
 distributed, reproduced, or disclosed to any third party without
 prior written permission from Your Company Name.
 
-Module: verification.py
-Author: Toku Dev
+Module: file_exists_verification.py
+Author: Toku
 """
 from overrides import override
 from toku.storage.driver.api import StorageDriver
@@ -21,7 +21,7 @@ from toku.storage.url.verifier import StorageUrlVerificationException
 
 class FileExistsVerification(Verification):
     """
-    Perform a verification to see if the path exists on the storage driver.
+    Performs a verification to see if the path exists on the storage driver.
     """
 
     def __init__(self, storage_driver: StorageDriver) -> None:
@@ -35,5 +35,14 @@ class FileExistsVerification(Verification):
 
     @override
     def verify(self, url_metadata: UrlMetadata) -> None:
+        """
+        Checks if the path in the `url_metadata` exists in the `self._storage_driver`.
+
+        Args:
+            url_metadata (UrlMetadata): The url metadata
+
+        Raises:
+            StorageUrlVerificationException: Problem with validation integrity
+        """
         if not self._storage_driver.exists(url_metadata.path):
             raise StorageUrlVerificationException(f"file {url_metadata.path} doesn't exists")

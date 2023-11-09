@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 # flake8: noqa: E501
+# pylint: disable=missing-class-docstring
 # pylint: disable=missing-function-docstring
 # pylint: disable=empty-docstring
 # pylint: disable=line-too-long
@@ -16,7 +17,7 @@ distributed, reproduced, or disclosed to any third party without
 prior written permission from Toku.
 
 Module: abstract_storage_driver_test.py
-Author: Toku Dev
+Author: Toku
 """
 from abc import ABC, abstractmethod
 from io import BufferedReader, BytesIO
@@ -59,7 +60,7 @@ class AbstractStorageDriverTest(StorageDriverTest[T], ABC, EnforceOverrides, Gen
 
         Start the setup process (sub-class).
 
-        Initialize the `storage_driver` by opening, the `sanitizer` and the `fake`.
+        Initialize the `storage_driver` by opening, the `sanitizer` and the `faker`.
 
         Return the control to the test.
 
@@ -78,7 +79,7 @@ class AbstractStorageDriverTest(StorageDriverTest[T], ABC, EnforceOverrides, Gen
         self._storage_driver: T = self._create_storage_driver()
         self._storage_driver.open()
         self._sanitizer: PathSanitizer = PathSanitizer(self._storage_driver.get_separator())
-        self._fake = Faker()
+        self._faker = Faker()
 
         # return control to the test
         yield
@@ -99,7 +100,7 @@ class AbstractStorageDriverTest(StorageDriverTest[T], ABC, EnforceOverrides, Gen
         Returns:
             bytearray: The byte array.
         """
-        return f"{self._fake.sentence(words)}"
+        return f"{self._faker.sentence(words)}"
 
     @final
     def _create_byte_array(self) -> bytes:
@@ -174,7 +175,7 @@ class AbstractStorageDriverTest(StorageDriverTest[T], ABC, EnforceOverrides, Gen
         """
         storage_driver: T = self._storage_driver if not target_storage_driver else target_storage_driver
         path: str = name if not directory or not directory.strip() else self._sanitizer.concat(directory, name)
-        content: bytes = bytes(self._fake.sentence(), "UTF-8")
+        content: bytes = bytes(self._faker.sentence(), "UTF-8")
         if not storage_driver.put_file_as(content, path):
             raise StorageDriverException(f"Could not create the file {path} for testing purpose")
 

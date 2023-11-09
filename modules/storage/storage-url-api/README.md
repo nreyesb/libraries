@@ -39,7 +39,7 @@ TODO
 from toku.storage.url.api import StorageUrl  # not needed, just to show the type of class to use
 
 with create_concrete_implementation() as storage_url:
-    file = "data.text"
+    file = "data.txt"
     content = "i'm the content"
 
     if not storage_url.exists(file)
@@ -111,7 +111,6 @@ Refers to **pyproject.toml** for information about:
 
 - License
 - Authors
-- Maintainers
 - References and Resources
     - Homepage
     - Documentation

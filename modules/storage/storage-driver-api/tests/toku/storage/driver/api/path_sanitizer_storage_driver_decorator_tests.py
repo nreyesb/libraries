@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 # flake8: noqa: E501
+# pylint: disable=missing-class-docstring
 # pylint: disable=missing-function-docstring
 # pylint: disable=empty-docstring
 # pylint: disable=line-too-long
@@ -16,7 +17,7 @@ distributed, reproduced, or disclosed to any third party without
 prior written permission from Toku.
 
 Module: path_sanitizer_storage_driver_decorator_tests.py
-Author: Toku Dev
+Author: Toku
 """
 from io import BufferedReader, BytesIO
 from dataclasses import dataclass
@@ -71,19 +72,19 @@ class PathSanitizerStorageDriverDecoratorTests:
 
         - In the case 2 the original path is:
 
-            \\root\\folder\\file.text
+            \\root\\folder\\file.txt
 
           and the final path must be:
 
-            /root/folder/file.text
+            /root/folder/file.txt
 
         - In the case 3 the original path is:
 
-            /root/folder/file.text
+            /root/folder/file.txt
 
           and the final path must be:
 
-            \\root\\folder\\file.text
+            \\root\\folder\\file.txt
 
         Args:
             request (FixtureRequest): The tuple with the expected and original directory separators

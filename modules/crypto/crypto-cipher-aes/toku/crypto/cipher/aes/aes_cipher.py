@@ -10,7 +10,7 @@ distributed, reproduced, or disclosed to any third party without
 prior written permission from Toku.
 
 Module: aes_cipher.py
-Author: Toku Dev
+Author: Toku
 """
 from typing import Optional, final
 from Crypto.Cipher import AES

@@ -10,7 +10,7 @@ distributed, reproduced, or disclosed to any third party without
 prior written permission from Toku.
 
 Module: sha521_hasher.py
-Author: Toku Dev
+Author: Toku
 """
 from typing import final
 from toku.crypto.hasher.sha import ShaHasher

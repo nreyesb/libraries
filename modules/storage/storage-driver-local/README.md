@@ -47,7 +47,7 @@ with LocalStorageDriver(
     root="/c/user/home/documents", 
     separator=DirectorySeparator.SLASH
 ) as storage_driver:
-    file = "data.text"
+    file = "data.txt"
     content = "i'm the content"
 
     if not storage_driver.exists(file)
@@ -119,7 +119,6 @@ Refers to **pyproject.toml** for information about:
 
 - License
 - Authors
-- Maintainers
 - References and Resources
     - Homepage
     - Documentation

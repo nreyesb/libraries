@@ -10,11 +10,12 @@ distributed, reproduced, or disclosed to any third party without
 prior written permission from Toku.
 
 Module: storage_url.py
-Author: Toku Dev
+Author: Toku
 """
 from abc import ABC, abstractmethod
 from overrides import EnforceOverrides
-from toku.storage.url.core import UrlSchema
+from toku.storage.driver.api import StorageDriver
+from toku.storage.url.core import Url
 from toku.storage.url.core import UrlMetadata
 from toku.storage.url.core import UrlEncoded
 from toku.storage.url.core import UrlStreaming
@@ -24,24 +25,25 @@ from toku.storage.url.verifier import Verification
 class StorageUrl(ABC, EnforceOverrides):
     """
     Provides the contract to define the abstraction to use the storage url to
-    get resources from an URL.
+    get a resource from an URL.
     """
 
     @abstractmethod
     def encode(
         self,
-        schema: UrlSchema,
-        authority: str,
-        path: str,
+        url: Url,
         url_metadata: UrlMetadata
     ) -> UrlEncoded:
         """
         Provides the process to create the `UrlEncoded` based on the `UrlMetadata`
-        and the data to create the URL to get the resource.
+        and the `Url` to create the URL itself to get the resource.
 
         View the `UrlEncoded` for more details, because it corresponds to a
-        representation of the `UrlMetadata` itself but using the internal
-        medatada as string.
+        representation of an URL with the `UrlMetadata` itself but using it as
+        string representation, finally the exposed URL uses a special string to
+        replace the string metadata in the url.
+
+        The final URL has to be an url safe.
 
         View the `decode` method to do the opposite process.
 
@@ -75,6 +77,7 @@ class StorageUrl(ABC, EnforceOverrides):
     @abstractmethod
     def streaming(
         self,
+        storage_driver: StorageDriver,
         url_metadata: UrlMetadata,
         verifications: list[Verification]
     ) -> UrlStreaming:

@@ -10,7 +10,7 @@ distributed, reproduced, or disclosed to any third party without
 prior written permission from Toku.
 
 Module: storage_driver.py
-Author: Toku Dev
+Author: Toku
 """
 from abc import ABC, abstractmethod
 from enum import Enum

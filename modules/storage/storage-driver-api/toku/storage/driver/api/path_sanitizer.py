@@ -10,7 +10,7 @@ distributed, reproduced, or disclosed to any third party without
 prior written permission from Toku.
 
 Module: path_sanitizer.py
-Author: Toku Dev
+Author: Toku
 """
 from typing import Optional
 from toku.storage.driver.api import DirectorySeparator

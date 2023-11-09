@@ -3,21 +3,11 @@ name = "toku-storage-driver-gcs"
 version = "0.1.0"
 description = "Project that provides the Google Cloud Storage (GCS) implemention for operating with storage driver"
 license = "Internal"
-authors = [
-    "Toku Dev <dev@trytoku.com>"
-]
-maintainers = [
-    "Toku Dev <dev@trytoku.com>"
-]
+authors = ["Toku <dev@trytoku.com>"]
 readme = "README.md"
 homepage = "https://www.jira.com"
 repository = "https://www.github.com"
 documentation = "https://www.notion.com"
-classifiers = [
-    "Development Status :: 4 - Beta",
-    "Programming Language :: Python :: 3.11",
-    "Topic :: Software Development :: Libraries"
-]
 packages = [
     {include = "toku"},
     {include = "tests"}

@@ -10,15 +10,15 @@ distributed, reproduced, or disclosed to any third party without
 prior written permission from Toku.
 
 Module: url_encoded.py
-Author: Toku Dev
+Author: Toku
 """
 from dataclasses import dataclass
-from toku.storage.url.core import UrlSchema
+from toku.storage.url.core import Url
 from toku.storage.url.core import StorageUrlException
 
 
 @dataclass
-class UrlEncoded:
+class UrlEncoded(Url):
     """
     Provides the data for an encoded url that allows to get a resource.
 
@@ -26,29 +26,22 @@ class UrlEncoded:
     representation of `UrlMetadata`.
     """
 
-    schema: UrlSchema  # the schema type to get the resource
-    authority: str  # the domain to get the resource, for example: www.my-domain.com
-    path: str  # the endpoint path to get the resource, for example: streaming/get/{metadata}
     metadata: str  # the encoded metadata, for example: hj9sa7d8fags9ad876fas9587duyasfdjhf
 
     def to_url(self) -> str:
         """
-        Creates the URL to get the resource using `schema`, `authority` and `path`
-        where the string {metadata} in `path` is replaced by the `metadata` itself.
+        Creates the URL to get the resource using the `super().to_url()` and
+        replacing the string {metadata} in the `path` with the `metadata`
+        itself.
 
         For example:
 
-        https://www.my-domain.com/streaming/get/hj9sa7d8fags9ad876fas9587duyasfdjhf
+        raw = https://www.my-domain.com/streaming/get/{metadata}
+        url = https://www.my-domain.com/streaming/get/hj9sa7d8fags9ad876fas9587duyasfdjhf
         """
-        if not self.authority.strip():
-            raise StorageUrlException("authority can't be empty")
-
-        if not self.path.strip():
-            raise StorageUrlException("path can't be empty")
+        url: str = super().to_url()
 
         if not self.metadata.strip():
             raise StorageUrlException("metadata can't be empty")
 
-        return f"{self.schema.value}://" \
-               f"{self.authority}" \
-               f"/{self.path.replace('{metadata}', self.metadata)}"
+        return f"{url.replace('{metadata}', self.metadata)}"

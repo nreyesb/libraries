@@ -10,7 +10,7 @@ distributed, reproduced, or disclosed to any third party without
 prior written permission from Toku.
 
 Module: storage_url_verification_exception.py
-Author: Toku Dev
+Author: Toku
 """
 from toku.storage.url.core import StorageUrlException
 
