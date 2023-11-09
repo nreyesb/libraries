@@ -25,6 +25,9 @@
       "path": "modules/storage/storage-url-api"
     },
     {
+      "path": "modules/storage/storage-url-built_in"
+    },
+    {
       "path": "modules/storage/storage-url-core"
     },
     {

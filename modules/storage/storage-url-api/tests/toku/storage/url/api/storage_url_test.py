@@ -94,6 +94,16 @@ class StorageUrlTest(ABC, EnforceOverrides, Generic[T]):
         """
 
     @abstractmethod
+    def test_streaming__check_custom_validation_is_called__then_raise_exception(self) -> None:
+        """
+        """
+
+    @abstractmethod
+    def test_streaming__check_custom_validation_is_called__then_return_url_streaming(self) -> None:
+        """
+        """
+
+    @abstractmethod
     def test_streaming__default_mimetype_using_file_without_extension__then_return_url_streaming(self) -> None:
         """
         """

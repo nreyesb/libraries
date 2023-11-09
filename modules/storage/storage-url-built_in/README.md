@@ -1,6 +1,6 @@
-# Cipher AES
+# StorageUrl BuiltIn
 
-This library aims to provide the implementation to use cryptography Cipher AES.
+This library aims to provide the implementation to use storage Url BuiltIn.
 
 ## Works with
 
@@ -9,13 +9,13 @@ This library aims to provide the implementation to use cryptography Cipher AES.
 Projects without poetry o for the local environment:
 
 ```bash
-pip install toku-crypto-cipher-aes@{version}
+pip install toku-storage-url-builtin@{version}
 ```
 
 Projects with poetry:
 
 ```bash
-poetry add toku-crypto-cipher-aes@{version}
+poetry add toku-storage-url-builtin@{version}
 ```
 
 The following command is useful to install the dependency in the poetry virtual environment for new version in progress, that means the library is not available in the remote repository for dowloanding but the code is available to build the dist or the dist is available in the local machine. It's important remember to run the command in the environment where the dependency is required and just add the dependency manually or change the version number in the pyproject.toml file, on that way it's not needed to use editable mode or path dependency in poetry:
@@ -28,6 +28,7 @@ poetry run python -m pip install {artifact_path}
 
 ##### Configuration
 
+TODO
 The library doesn't require any specific configuration to use it.
 
 ##### Example
@@ -35,16 +36,46 @@ The library doesn't require any specific configuration to use it.
 To use the library, you can import it in your Python code:
 
 ```python
-from toku.crypto.cipher.api import Cipher # optional, if not needed, just remove Cipher type hint or put AesCipher
-from toku.crypto.cipher.aes import AesCipher
+# encode
+import timedelta
+from toku.storage.url.built_in import BuiltInMetadataStorageUrl
+from toku.storage.url.core import Url
+from toku.storage.url.core import UrlSchema
+from toku.storage.url.core import UrlMetadata
+from toku.storage.url.core import UrlEncoded
+from toku.storage.url.core import Classification
+from toku.storage.url.core import Principal
+from toku.storage.url.core import Condition
+from toku.storage.url.core import DateTimeCondition
+from toku.storage.url.core import DateTime
 
-key: str = "" # see the documentation of the class
-cipher: Cipher = AesCipher(key)
-ciphertext: str = cipher.encrypt("my_text")
-plaintext: str = cipher.decrypt(ciphertext)
+url_encoded: UrlEncoded = BuiltInMetadataStorageUrl().encode(
+    url=Url(
+        UrlSchema.HTTPS,
+        "www.my-domain.com",
+        "v1/streaming/{metadata}"
+    ),
+    url_metadata=UrlMetadata \
+        .builder(
+            path="directory/file.txt",
+            storage_driver_reference="storage-reference"
+        ) \
+        .classification(Classification.INTERNAL)
+        .principal(Principal("USERNAME"))
+        .condition(Condition(
+            datetime=DateTimeCondition(
+                access_from=DateTime.create().to_string(),
+                access_until=DateTime.create().delta(timedelta(seconds=30)).to_string()
+            )
+        ))
+        .metadata({
+            "key": "value"
+        })
+        .build()
+)
 
-print(ciphertext)
-print(plaintext)
+url: str = url_encoded.to_url()
+print(url)
 ```
 
 ### As Project

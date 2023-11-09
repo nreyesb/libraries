@@ -210,20 +210,6 @@ files = [
 ]
 
 [[package]]
-name = "humanize"
-version = "4.8.0"
-description = "Python humanize utilities"
-optional = false
-python-versions = ">=3.8"
-files = [
-    {file = "humanize-4.8.0-py3-none-any.whl", hash = "sha256:8bc9e2bb9315e61ec06bf690151ae35aeb65651ab091266941edf97c90836404"},
-    {file = "humanize-4.8.0.tar.gz", hash = "sha256:9783373bf1eec713a770ecaa7c2d7a7902c98398009dfa3d8a2df91eec9311e8"},
-]
-
-[package.extras]
-tests = ["freezegun", "pytest", "pytest-cov"]
-
-[[package]]
 name = "iniconfig"
 version = "2.0.0"
 description = "brain-dead simple config-ini parsing"
@@ -514,6 +500,30 @@ files = [
 ]
 
 [[package]]
+name = "toku-crypto-cipher-aes"
+version = "0.1.0"
+description = "Project that provides the AES implemention for operating with cipher"
+optional = false
+python-versions = "*"
+files = []
+
+[package.source]
+type = "file"
+url = "../../crypto/crypto-cipher-aes/dist/toku_crypto_cipher_aes-0.1.0.tar.gz"
+
+[[package]]
+name = "toku-storage-url-api"
+version = "0.1.0"
+description = "Project that provides the API for operating with storage url"
+optional = false
+python-versions = "*"
+files = []
+
+[package.source]
+type = "file"
+url = "../storage-url-api/dist/toku_storage_url_api-0.1.0.tar.gz"
+
+[[package]]
 name = "tomlkit"
 version = "0.12.2"
 description = "Style preserving TOML library"
@@ -538,4 +548,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "a444e50477b2aa8058b60beb12626a801e7711332d1ac6ed462fa5e40b4d6c97"
+content-hash = "a75ae52bc96c0d97d779b6070b85e7d2bcf67e5799dfa1816fea80555e551987"

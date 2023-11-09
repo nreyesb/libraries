@@ -53,33 +53,6 @@ class GcsStorageDriverTests(AbstractStorageDriverTest[GcsStorageDriver]):
     BUCKET: Any | None = None
     WD: str = ""
 
-    @pytest.fixture(scope="class", autouse=True)
-    def setup_tests(self) -> Generator[None, None, None]:
-        # setup
-        GcsStorageDriverTests.GCP_PROJECT_ID = os.environ.get("GCP_PROJECT_ID", "")
-        GcsStorageDriverTests.GCP_BUCKET_NAME = os.environ.get("GCP_BUCKET_NAME", "")
-        GcsStorageDriverTests.GCP_CREDENTIALS = os.environ.get("GCP_CREDENTIALS_FILE", "")
-        GcsStorageDriverTests.WD = self._create_directory_path()
-
-        credentials = service_account.Credentials.from_service_account_file(GcsStorageDriverTests.GCP_CREDENTIALS)
-        self._storage = storage.Client(
-            project=GcsStorageDriverTests.GCP_PROJECT_ID,
-            credentials=credentials
-        )
-        GcsStorageDriverTests.BUCKET = self._storage.bucket(GcsStorageDriverTests.GCP_BUCKET_NAME)
-        self._make_directory(GcsStorageDriverTests.WD)
-
-        # return control to the test
-        yield
-
-        # teardown
-        blobs = GcsStorageDriverTests.BUCKET.list_blobs(prefix=GcsStorageDriverTests.WD)
-
-        for blob in blobs:
-            blob.delete()
-
-        self._storage.close()
-
     @override
     def _initialize_test(self) -> None:
         self._working_directory_primary_storage_driver: str = self._create_directory_path_in_root()
@@ -122,6 +95,33 @@ class GcsStorageDriverTests(AbstractStorageDriverTest[GcsStorageDriver]):
             blob.upload_from_string(b"")
             return True
         return False
+
+    @pytest.fixture(scope="class", autouse=True)
+    def setup_tests(self) -> Generator[None, None, None]:
+        # setup
+        GcsStorageDriverTests.GCP_PROJECT_ID = os.environ.get("GCP_PROJECT_ID", "")
+        GcsStorageDriverTests.GCP_BUCKET_NAME = os.environ.get("GCP_BUCKET_NAME", "")
+        GcsStorageDriverTests.GCP_CREDENTIALS = os.environ.get("GCP_CREDENTIALS_FILE", "")
+        GcsStorageDriverTests.WD = self._create_directory_path()
+
+        credentials = service_account.Credentials.from_service_account_file(GcsStorageDriverTests.GCP_CREDENTIALS)
+        self._storage = storage.Client(
+            project=GcsStorageDriverTests.GCP_PROJECT_ID,
+            credentials=credentials
+        )
+        GcsStorageDriverTests.BUCKET = self._storage.bucket(GcsStorageDriverTests.GCP_BUCKET_NAME)
+        self._make_directory(GcsStorageDriverTests.WD)
+
+        # return control to the test
+        yield
+
+        # teardown
+        blobs = GcsStorageDriverTests.BUCKET.list_blobs(prefix=GcsStorageDriverTests.WD)
+
+        for blob in blobs:
+            blob.delete()
+
+        self._storage.close()
 
     @override
     def test_open__successful_driver_initialization__then_return_void(self) -> None:

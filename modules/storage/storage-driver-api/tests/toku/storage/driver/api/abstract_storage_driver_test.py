@@ -53,43 +53,6 @@ class AbstractStorageDriverTest(StorageDriverTest[T], ABC, EnforceOverrides, Gen
     """
 
     @final
-    @pytest.fixture(autouse=True)
-    def setup_test(self) -> Generator[None, None, None]:
-        """
-        Start the temporary directory
-
-        Start the setup process (sub-class).
-
-        Initialize the `storage_driver` by opening, the `sanitizer` and the `faker`.
-
-        Return the control to the test.
-
-        Cleanup the temporary directory.
-
-        Close the `storage_driver`.
-
-        Start the teardown process (sub-class).
-
-        Yields:
-            Generator[None, None, None]: To return the control to the test and after that finishing the test
-        """
-        # setup
-        self._tempdir = tempfile.TemporaryDirectory()
-        self._initialize_test()
-        self._storage_driver: T = self._create_storage_driver()
-        self._storage_driver.open()
-        self._sanitizer: PathSanitizer = PathSanitizer(self._storage_driver.get_separator())
-        self._faker = Faker()
-
-        # return control to the test
-        yield
-
-        # teardown
-        self._tempdir.cleanup()
-        self._storage_driver.close()
-        self._teardown_test()
-
-    @final
     def _create_string(self, words: Optional[int] = 20 ) -> str:
         """
         Create a random string.
@@ -205,6 +168,61 @@ class AbstractStorageDriverTest(StorageDriverTest[T], ABC, EnforceOverrides, Gen
             raise StorageDriverException(f"Could not create the directory {directory} for testing purpose")
 
         return directory
+
+    @abstractmethod
+    def _create_storage_driver(self) -> T:
+        """
+        Provides the storage driver instance
+
+        Returns:
+            T: The storage driver instance for testing.
+        """
+
+    @abstractmethod
+    def _create_storage_driver_secondary(self) -> T:
+        """
+        Provides the storage driver secondary instance
+
+        Returns:
+            T: The storage driver secondary instance for testing.
+        """
+
+    @final
+    @pytest.fixture(autouse=True)
+    def setup_test(self) -> Generator[None, None, None]:
+        """
+        Start the temporary directory
+
+        Start the setup process (sub-class).
+
+        Initialize the `storage_driver` by opening, the `sanitizer` and the `faker`.
+
+        Return the control to the test.
+
+        Cleanup the temporary directory.
+
+        Close the `storage_driver`.
+
+        Start the teardown process (sub-class).
+
+        Yields:
+            Generator[None, None, None]: To return the control to the test and after that finishing the test
+        """
+        # setup
+        self._tempdir = tempfile.TemporaryDirectory()
+        self._initialize_test()
+        self._storage_driver: T = self._create_storage_driver()
+        self._storage_driver.open()
+        self._sanitizer: PathSanitizer = PathSanitizer(self._storage_driver.get_separator())
+        self._faker = Faker()
+
+        # return control to the test
+        yield
+
+        # teardown
+        self._tempdir.cleanup()
+        self._storage_driver.close()
+        self._teardown_test()
 
     @final
     @override
@@ -2716,21 +2734,3 @@ class AbstractStorageDriverTest(StorageDriverTest[T], ABC, EnforceOverrides, Gen
         assert not metadata.is_symbolic_link
         # ensure that the root is the original
         assert self._sanitizer.sanitize(self._storage_driver.get_root()) == self._sanitizer.sanitize(root)
-
-    @abstractmethod
-    def _create_storage_driver(self) -> T:
-        """
-        Provides the storage driver instance
-
-        Returns:
-            T: The storage driver instance for testing.
-        """
-
-    @abstractmethod
-    def _create_storage_driver_secondary(self) -> T:
-        """
-        Provides the storage driver secondary instance
-
-        Returns:
-            T: The storage driver secondary instance for testing.
-        """

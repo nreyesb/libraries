@@ -33,6 +33,24 @@ class HasherTest(ABC, EnforceOverrides, Generic[T]):
     Provides test cases for any kind Hasher class.
     """
 
+    @abstractmethod
+    def _create_hasher(self) -> T:
+        """
+        Provides the haser instance
+
+        Returns:
+            T: The hasher instance for testing.
+        """
+
+    @abstractmethod
+    def _create_plain_vs_hasher_texts(self) -> dict[str, str]:
+        """
+        Provides a dict with plain vs hasher texts for testing.
+
+        Returns:
+            dict[str, str]: The dict with the plain and hasher texts for testing.
+        """
+
     @pytest.fixture(autouse=True)
     def setup_test(self) -> Generator[None, None, None]:
         """
@@ -109,21 +127,3 @@ class HasherTest(ABC, EnforceOverrides, Generic[T]):
             assert hash_value
             assert hash_value != plaintext
             assert hash_value == hashertext
-
-    @abstractmethod
-    def _create_hasher(self) -> T:
-        """
-        Provides the haser instance
-
-        Returns:
-            T: The hasher instance for testing.
-        """
-
-    @abstractmethod
-    def _create_plain_vs_hasher_texts(self) -> dict[str, str]:
-        """
-        Provides a dict with plain vs hasher texts for testing.
-
-        Returns:
-            dict[str, str]: The dict with the plain and hasher texts for testing.
-        """

@@ -21,6 +21,7 @@ Author: Toku
 """
 from abc import ABC, abstractmethod
 from datetime import timedelta
+from urllib.parse import urlparse
 from io import BufferedReader, BytesIO
 import re
 from typing import Generator, Generic, TypeVar, final
@@ -35,21 +36,94 @@ from toku.storage.url.core import Url
 from toku.storage.url.core import UrlSchema
 from toku.storage.url.core import UrlMetadata
 from toku.storage.url.core import UrlEncoded
-from toku.storage.url.core import UrlStreaming
 from toku.storage.url.core import Classification
 from toku.storage.url.core import Principal
 from toku.storage.url.core import Condition
 from toku.storage.url.core import DateTimeCondition
 from toku.storage.url.core import DateTime
 from toku.storage.url.core import StorageUrlException
+from toku.storage.url.verifier import Verification
+from toku.storage.url.verifier import StorageUrlVerificationException
 
 T = TypeVar("T", bound=AbstractStorageUrl)
+
+
+class ValidVerification(Verification):
+
+    def __init__(self) -> None:
+        self.called = False
+
+    @override
+    def verify(self, url_metadata: UrlMetadata) -> None:
+        self.called = True
+
+
+class InvalidVerification(Verification):
+
+    @override
+    def verify(self, url_metadata: UrlMetadata) -> None:
+        raise StorageUrlVerificationException("testing raise exception for custom verifications")
 
 
 class AbstractStorageUrlTest(StorageUrlTest[T], ABC, EnforceOverrides, Generic[T]):
     """
     Provides the default implementation for test cases for any kind AbstractStorageUrl class.
     """
+
+    DEFAULT_PATH_WITH_EXTENSION = "directory/file.txt"
+    DEFAULT_PATH_WITHOUT_EXTENSION = "directory/file"
+    DEFAULT_MIMETYPE = "application/octet-stream"
+    DEFAULT_METADATA = {"key1": "áéíóú","key2": " value2 "}
+
+    @abstractmethod
+    def _create_storage_url(self) -> T:
+        """
+        Provides the storage url instance
+
+        Returns:
+            T: The storage url instance for testing.
+        """
+
+    def _get_content_from_input_stream(self, input_stream: BufferedReader) -> tuple[bytes, int]:
+        """
+        Get the content of an input stream using a low buffer size because
+        the idea is to simulate the same behavior that a TCP/IP with HTTP
+        protocol does to download an input stream.
+
+        Args:
+            input_stream (BufferedReader): The content as input stream
+
+        Returns:
+            tuple[bytes, int]: The content in bytes and the total of interaction
+                               that it takes to read the input stream
+        """
+        buffer_size = 16  # buffer size
+        content = b''
+        total_interation = 0
+
+        while True:
+            total_interation += 1
+            chunk: bytes = input_stream.read(buffer_size)
+
+            if not chunk:
+                break  # end of the file
+
+            content += chunk
+
+        return (content, total_interation)
+
+    def _get_default_url(self) -> Url:
+        """
+        Gets a default URL for testing purpose.
+
+        Returns:
+            Url: The URL
+        """
+        return Url(
+            UrlSchema.HTTPS,
+            "www.my-domain.com",
+            "v1/streaming/{metadata}"
+        )
 
     @final
     @pytest.fixture(autouse=True)
@@ -77,14 +151,13 @@ class AbstractStorageUrlTest(StorageUrlTest[T], ABC, EnforceOverrides, Generic[T
         # teardown
         self._teardown_test()
 
-
     @final
     @override
     def test_encode__url_empty_authority__then_raise_exception(self) -> None:
         with pytest.raises(StorageUrlException) as exc_info:
             self._storage_url.encode(
                 url=Url(
-                    UrlSchema.HTTP,
+                    UrlSchema.HTTPS,
                     "",
                     "path"
                 ),
@@ -94,7 +167,8 @@ class AbstractStorageUrlTest(StorageUrlTest[T], ABC, EnforceOverrides, Generic[T
                         storage_driver_reference=""
                     ) \
                     .build()
-            )
+            ) \
+            .to_url()
 
         assert str(exc_info.value) == "authority can't be empty"
 
@@ -104,7 +178,7 @@ class AbstractStorageUrlTest(StorageUrlTest[T], ABC, EnforceOverrides, Generic[T
         with pytest.raises(StorageUrlException) as exc_info:
             self._storage_url.encode(
                 url=Url(
-                    UrlSchema.HTTP,
+                    UrlSchema.HTTPS,
                     "authority",
                     ""
                 ),
@@ -114,14 +188,15 @@ class AbstractStorageUrlTest(StorageUrlTest[T], ABC, EnforceOverrides, Generic[T
                         storage_driver_reference=""
                     ) \
                     .build()
-            )
+            ) \
+            .to_url()
 
         assert str(exc_info.value) == "path can't be empty"
 
     @final
     @override
     def test_encode__url_metadata_to_string_is_empty__then_raise_exception(self) -> None:
-        path = "directory/file.txt"
+        path = AbstractStorageUrlTest.DEFAULT_PATH_WITH_EXTENSION
         url_metadata: UrlMetadata = UrlMetadata \
             .builder(
                 path=path,
@@ -132,11 +207,7 @@ class AbstractStorageUrlTest(StorageUrlTest[T], ABC, EnforceOverrides, Generic[T
 
         with pytest.raises(StorageUrlException) as exc_info:
             self._storage_url.encode(
-                url=Url(
-                    UrlSchema.HTTP,
-                    "www.my-domain.com",
-                    "v1/streaming/{metadata}"
-                ),
+                url=self._get_default_url(),
                 url_metadata=url_metadata
             )
 
@@ -145,14 +216,10 @@ class AbstractStorageUrlTest(StorageUrlTest[T], ABC, EnforceOverrides, Generic[T
     @final
     @override
     def test_encode__url_metadata_reported_full_values__then_return_url_encoded(self) -> None:
-        path = "directory/file.txt"
+        path = AbstractStorageUrlTest.DEFAULT_PATH_WITH_EXTENSION
 
         url_encoded: UrlEncoded = self._storage_url.encode(
-            url=Url(
-                UrlSchema.HTTP,
-                "www.my-domain.com",
-                "v1/streaming/{metadata}"
-            ),
+            url=self._get_default_url(),
             url_metadata=UrlMetadata \
                 .builder(
                     path=path,
@@ -166,19 +233,19 @@ class AbstractStorageUrlTest(StorageUrlTest[T], ABC, EnforceOverrides, Generic[T
                         access_until=DateTime.create().delta(timedelta(seconds=30)).to_string()
                     )
                 ))
-                .metadata({
-                    "key1": "áéíóú",
-                    "key2": " value2 "
-                })
+                .metadata(AbstractStorageUrlTest.DEFAULT_METADATA)
                 .build()
         )
 
-        assert url_encoded.schema == UrlSchema.HTTPS
+        url: str = url_encoded.to_url()
+        url_parsed = urlparse(url)  # to check if the URL has a valid format (url safe)
+
+        assert url_encoded.schema.value == UrlSchema.HTTPS.value
         assert url_encoded.authority == "www.my-domain.com"
         assert url_encoded.path == "v1/streaming/{metadata}"
         assert url_encoded.metadata
-        assert re.match(r'^[https://www.my-domain.com/v1/streaming/](.)+$', url_encoded.to_url())
-        # TODO add assert to check the consistency of the URL
+        assert re.match(r'^https://www\.my-domain\.com/v1/streaming/.*$', url)
+        assert url == f"{url_parsed.scheme}://{url_parsed.hostname}{url_parsed.path}"
 
     @final
     @override
@@ -193,18 +260,10 @@ class AbstractStorageUrlTest(StorageUrlTest[T], ABC, EnforceOverrides, Generic[T
     def test_decode__metadata_reported_full_values__then_return_url_metadata(self) -> None:
         access_from: DateTime = DateTime.create()
         access_until: DateTime = DateTime.create().delta(timedelta(seconds=30))
-        path = "directory/file.txt"
-        content: bytes = self._faker.sentence(10000)
-        storage_driver = StubStorageDriver()
-        flexmock(storage_driver).should_receive("exists").with_args(path).and_return(True).once()
-        flexmock(storage_driver).should_receive("get_as_input_stream").with_args(path).and_return(content).once()
+        path = AbstractStorageUrlTest.DEFAULT_PATH_WITH_EXTENSION
 
         url_encoded: UrlEncoded = self._storage_url.encode(
-            url=Url(
-                UrlSchema.HTTP,
-                "www.my-domain.com",
-                "v1/streaming/{metadata}"
-            ),
+            url=self._get_default_url(),
             url_metadata=UrlMetadata \
                 .builder(
                     path=path,
@@ -218,10 +277,7 @@ class AbstractStorageUrlTest(StorageUrlTest[T], ABC, EnforceOverrides, Generic[T
                         access_until=access_until.to_string()
                     )
                 ))
-                .metadata({
-                    "key1": "áéíóú",
-                    "key2": " value2 "
-                })
+                .metadata(AbstractStorageUrlTest.DEFAULT_METADATA)
                 .build()
         )
 
@@ -232,12 +288,12 @@ class AbstractStorageUrlTest(StorageUrlTest[T], ABC, EnforceOverrides, Generic[T
         assert url_metadata.principal.name == "USERNAME"
         assert url_metadata.condition.datetime.access_from == access_from.to_string()
         assert url_metadata.condition.datetime.access_until == access_until.to_string()
-        assert url_metadata.metadata == {"key1": "áéíóú","key2": " value2 "}
+        assert url_metadata.metadata == AbstractStorageUrlTest.DEFAULT_METADATA
 
     @final
     @override
     def test_streaming__url_metadata_file_doesnt_exists__then_raise_exception(self) -> None:
-        path = "directory/file.txt"
+        path = AbstractStorageUrlTest.DEFAULT_PATH_WITH_EXTENSION
         storage_driver = StubStorageDriver()
         flexmock(storage_driver).should_receive("exists").with_args(path).and_return(False).once()
 
@@ -258,7 +314,7 @@ class AbstractStorageUrlTest(StorageUrlTest[T], ABC, EnforceOverrides, Generic[T
     @override
     def test_streaming__url_metadata_datetime_acces_from_in_the_future__then_raise_exception(self) -> None:
         access_from: DateTime = DateTime.create().delta(timedelta(seconds=30))
-        path = "directory/file.txt"
+        path = AbstractStorageUrlTest.DEFAULT_PATH_WITH_EXTENSION
         storage_driver = StubStorageDriver()
         flexmock(storage_driver).should_receive("exists").with_args(path).and_return(True).once()
 
@@ -280,13 +336,13 @@ class AbstractStorageUrlTest(StorageUrlTest[T], ABC, EnforceOverrides, Generic[T
                     .build()
             )
 
-        assert str(exc_info.value) == f"resource will be accessible from {access_from}"
+        assert str(exc_info.value) == f"resource will be accessible from {access_from.to_string()}"
 
     @final
     @override
     def test_streaming__url_metadata_datetime_acces_until_in_the_past__then_raise_exception(self) -> None:
         access_until: DateTime = DateTime.create().delta(timedelta(seconds=-30))
-        path = "directory/file.txt"
+        path = AbstractStorageUrlTest.DEFAULT_PATH_WITH_EXTENSION
         storage_driver = StubStorageDriver()
         flexmock(storage_driver).should_receive("exists").with_args(path).and_return(True).once()
 
@@ -308,12 +364,12 @@ class AbstractStorageUrlTest(StorageUrlTest[T], ABC, EnforceOverrides, Generic[T
                     .build()
             )
 
-        assert str(exc_info.value) == f"resource was accessible until {access_until}"
+        assert str(exc_info.value) == f"resource was accessible until {access_until.to_string()}"
 
     @final
     @override
     def test_streaming__input_stream_is_none__then_raise_exception(self) -> None:
-        path = "directory/file.txt"
+        path = AbstractStorageUrlTest.DEFAULT_PATH_WITH_EXTENSION
         storage_driver = StubStorageDriver()
         flexmock(storage_driver).should_receive("exists").with_args(path).and_return(True).once()
         flexmock(storage_driver).should_receive("get_as_input_stream").with_args(path).and_return(None).once()
@@ -333,14 +389,69 @@ class AbstractStorageUrlTest(StorageUrlTest[T], ABC, EnforceOverrides, Generic[T
 
     @final
     @override
-    def test_streaming__default_mimetype_using_file_without_extension__then_return_url_streaming(self) -> None:
-        path = "directory/file"
-        content: bytes = self._faker.sentence(10000)
+    def test_streaming__check_custom_validation_is_called__then_raise_exception(self) -> None:
+        path = AbstractStorageUrlTest.DEFAULT_PATH_WITHOUT_EXTENSION
+        storage_driver = StubStorageDriver()
+        flexmock(storage_driver).should_receive("exists").with_args(path).and_return(True).once()
+
+        with pytest.raises(StorageUrlException) as exc_info:
+            self._storage_url.streaming(
+                storage_driver=storage_driver,
+                url_metadata=UrlMetadata \
+                    .builder(
+                        path=path,
+                        storage_driver_reference=""
+                    ) \
+                    .build(),
+                verifications=[
+                    InvalidVerification()
+                ]
+            )
+
+        assert str(exc_info.value) == "testing raise exception for custom verifications"
+
+    @final
+    @override
+    def test_streaming__check_custom_validation_is_called__then_return_url_streaming(self) -> None:
+        verification: ValidVerification = ValidVerification()
+        assert not verification.called
+
+        path = AbstractStorageUrlTest.DEFAULT_PATH_WITHOUT_EXTENSION
+        content: bytes = bytes(self._faker.sentence(10000), "UTF-8")
         storage_driver = StubStorageDriver()
         flexmock(storage_driver).should_receive("exists").with_args(path).and_return(True).once()
         flexmock(storage_driver).should_receive("get_as_input_stream").with_args(path).and_return(BufferedReader(BytesIO(content))).once()  # type: ignore[arg-type]
 
-        url_streaming: UrlStreaming = self._storage_url.streaming(
+        with self._storage_url.streaming(
+            storage_driver=storage_driver,
+            url_metadata=UrlMetadata \
+                .builder(
+                    path=path,
+                    storage_driver_reference=""
+                ) \
+                .build(),
+            verifications=[
+                verification
+            ]
+        ) as url_streaming:
+            content_from_input_stream, total_interation = self._get_content_from_input_stream(url_streaming.data)
+
+            assert total_interation > 1
+            assert url_streaming.content_type == AbstractStorageUrlTest.DEFAULT_MIMETYPE
+            assert content_from_input_stream == content
+
+        assert verification.called
+
+    @final
+    @override
+    def test_streaming__default_mimetype_using_file_without_extension__then_return_url_streaming(self) -> None:
+        path = AbstractStorageUrlTest.DEFAULT_PATH_WITHOUT_EXTENSION
+        content: bytes = bytes(self._faker.sentence(10000), "UTF-8")
+        storage_driver = StubStorageDriver()
+        flexmock(storage_driver).should_receive("exists").with_args(path).and_return(True).once()
+        flexmock(storage_driver).should_receive("get_as_input_stream").with_args(path).and_return(BufferedReader(BytesIO(content))).once()  # type: ignore[arg-type]
+
+        with self._storage_url.streaming(
             storage_driver=storage_driver,
             url_metadata=UrlMetadata \
                 .builder(
@@ -348,21 +459,23 @@ class AbstractStorageUrlTest(StorageUrlTest[T], ABC, EnforceOverrides, Generic[T
                     storage_driver_reference=""
                 ) \
                 .build()
-        )
+        ) as url_streaming:
+            content_from_input_stream, total_interation = self._get_content_from_input_stream(url_streaming.data)
 
-        assert url_streaming.content_type == "application/octet-stream"
-        assert url_streaming.data.read() == content
+            assert total_interation > 1
+            assert url_streaming.content_type == AbstractStorageUrlTest.DEFAULT_MIMETYPE
+            assert content_from_input_stream == content
 
     @final
     @override
     def test_streaming__default_mimetype_using_file_with_extension__then_return_url_streaming(self) -> None:
         path = "directory/file.fake"
-        content: bytes = self._faker.sentence(10000)
+        content: bytes = bytes(self._faker.sentence(10000), "UTF-8")
         storage_driver = StubStorageDriver()
         flexmock(storage_driver).should_receive("exists").with_args(path).and_return(True).once()
         flexmock(storage_driver).should_receive("get_as_input_stream").with_args(path).and_return(BufferedReader(BytesIO(content))).once()  # type: ignore[arg-type]
 
-        url_streaming: UrlStreaming = self._storage_url.streaming(
+        with self._storage_url.streaming(
             storage_driver=storage_driver,
             url_metadata=UrlMetadata \
                 .builder(
@@ -370,21 +483,23 @@ class AbstractStorageUrlTest(StorageUrlTest[T], ABC, EnforceOverrides, Generic[T
                     storage_driver_reference=""
                 ) \
                 .build()
-        )
+        ) as url_streaming:
+            content_from_input_stream, total_interation = self._get_content_from_input_stream(url_streaming.data)
 
-        assert url_streaming.content_type == "application/octet-stream"
-        assert url_streaming.data.read() == content
+            assert total_interation > 1
+            assert url_streaming.content_type == AbstractStorageUrlTest.DEFAULT_MIMETYPE
+            assert content_from_input_stream == content
 
     @final
     @override
     def test_streaming__determined_mimetype_using_file_with_extension__then_return_url_streaming(self) -> None:
-        path = "directory/file.txt"
-        content: bytes = self._faker.sentence(10000)
+        path = AbstractStorageUrlTest.DEFAULT_PATH_WITH_EXTENSION
+        content: bytes = bytes(self._faker.sentence(10000), "UTF-8")
         storage_driver = StubStorageDriver()
         flexmock(storage_driver).should_receive("exists").with_args(path).and_return(True).once()
         flexmock(storage_driver).should_receive("get_as_input_stream").with_args(path).and_return(BufferedReader(BytesIO(content))).once()  # type: ignore[arg-type]
 
-        url_streaming: UrlStreaming = self._storage_url.streaming(
+        with self._storage_url.streaming(
             storage_driver=storage_driver,
             url_metadata=UrlMetadata \
                 .builder(
@@ -392,16 +507,9 @@ class AbstractStorageUrlTest(StorageUrlTest[T], ABC, EnforceOverrides, Generic[T
                     storage_driver_reference=""
                 ) \
                 .build()
-        )
+        ) as url_streaming:
+            content_from_input_stream, total_interation = self._get_content_from_input_stream(url_streaming.data)
 
-        assert url_streaming.content_type == "text/plain"
-        assert url_streaming.data.read() == content
-
-    @abstractmethod
-    def _create_storage_url(self) -> T:
-        """
-        Provides the storage url instance
-
-        Returns:
-            T: The storage url instance for testing.
-        """
+            assert total_interation > 1
+            assert url_streaming.content_type == "text/plain"
+            assert content_from_input_stream == content

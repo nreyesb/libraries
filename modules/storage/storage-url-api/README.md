@@ -35,25 +35,46 @@ The library doesn't require any specific configuration to use it.
 To use the library, you can import it in your Python code:
 
 ```python
-TODO
+# encode
+import timedelta
 from toku.storage.url.api import StorageUrl  # not needed, just to show the type of class to use
+from toku.storage.url.core import Url
+from toku.storage.url.core import UrlSchema
+from toku.storage.url.core import UrlMetadata
+from toku.storage.url.core import UrlEncoded
+from toku.storage.url.core import Classification
+from toku.storage.url.core import Principal
+from toku.storage.url.core import Condition
+from toku.storage.url.core import DateTimeCondition
+from toku.storage.url.core import DateTime
 
-with create_concrete_implementation() as storage_url:
-    file = "data.txt"
-    content = "i'm the content"
+url_encoded: UrlEncoded = create_concrete_implementation().encode(
+    url=Url(
+        UrlSchema.HTTPS,
+        "www.my-domain.com",
+        "v1/streaming/{metadata}"
+    ),
+    url_metadata=UrlMetadata \
+        .builder(
+            path="directory/file.txt",
+            storage_driver_reference="storage-reference"
+        ) \
+        .classification(Classification.INTERNAL)
+        .principal(Principal("USERNAME"))
+        .condition(Condition(
+            datetime=DateTimeCondition(
+                access_from=DateTime.create().to_string(),
+                access_until=DateTime.create().delta(timedelta(seconds=30)).to_string()
+            )
+        ))
+        .metadata({
+            "key": "value"
+        })
+        .build()
+)
 
-    if not storage_url.exists(file)
-        if storage_url.put_file_as(bytes(content, "utf-8"), file):
-            content_1_: bytes = storage_url.get(file)
-
-            with storage_url.get_as_input_stream(file) as input_stream:
-                content_2: bytes = input_stream.read()
-            
-            print(content_1)
-            print(content_2)
-    
-    files: list[str] = storage_url.files("")
-    print(files)
+url: str = url_encoded.to_url()
+print(url)
 ```
 
 ### As Project
@@ -102,7 +123,7 @@ You can run the tests using:
 # --cov-fail-under=MIN to set the minimum needed
 # -n {NUM} to run in differents workers in parallel
 
-poetry run pytest -n 2 -v --cov --cov-fail-under=MIN
+poetry run pytest -n {WORKERS} -v --cov --cov-fail-under={MIN}
 ```
 
 ## About

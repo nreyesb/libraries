@@ -127,7 +127,7 @@ You can run the tests using:
 # --cov-fail-under=MIN to set the minimum needed
 # -n {NUM} to run in differents workers in parallel
 
-poetry run pytest -n 2 -v --cov --cov-fail-under=MIN
+poetry run pytest -n {WORKERS} -v --cov --cov-fail-under={MIN}
 ```
 
 ## About

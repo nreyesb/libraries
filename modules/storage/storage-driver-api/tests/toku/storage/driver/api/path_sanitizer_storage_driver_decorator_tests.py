@@ -48,6 +48,43 @@ class PathSanitizerStorageDriverDecoratorTests:
 
     FAKE = Faker()
 
+    def _create_path(self, path: str) -> PathHelper:
+        """
+        Create a path to sanitize function by replacing / and \\ in the provided path with `separator_to_sanitize`.
+        Also, create a path sanitized using `separator_sanitized`.
+
+        Args:
+            path (str): The path to create
+
+        Returns:
+            PathHelper: The path to sanitize and sanitized
+        """
+        path_to_sanitize: str = path \
+            .replace(DirectorySeparator.BACKSLASH.value, self._separator_to_sanitize.value) \
+            .replace(DirectorySeparator.SLASH.value, self._separator_to_sanitize.value)
+        path_sanitized: str = PathSanitizer(self._separator_sanitized).sanitize(path, True)
+
+        return PathHelper(path_to_sanitize, path_sanitized)
+
+    def _create_byte_array(self) -> bytes:
+        """
+        Create a byte array from a string.
+
+        Returns:
+            bytearray: The byte array.
+        """
+        return bytes(PathSanitizerStorageDriverDecoratorTests.FAKE.sentence(), "utf-8")
+
+    def _create_input_stream(self) -> BufferedReader:
+        """
+        Create an input stream from a byte array (`create_byte_array`).
+
+        Returns:
+            InputStream: The input stream.
+        """
+        bytes_handle = BytesIO(self._create_byte_array())
+        return BufferedReader(bytes_handle)  # type: ignore[arg-type]
+
     @pytest.fixture(params=[
         (DirectorySeparator.SLASH, DirectorySeparator.SLASH),
         (DirectorySeparator.SLASH, DirectorySeparator.BACKSLASH),
@@ -97,43 +134,6 @@ class PathSanitizerStorageDriverDecoratorTests:
         flexmock(self._storage_driver).should_call("get_separator").once()
         self._storage_driver_decorator: PathSanitizerStorageDriverDecorator = PathSanitizerStorageDriverDecorator(self._storage_driver)
         self._sanitizer: PathSanitizer = self._storage_driver_decorator._sanitizer  # pylint: disable=protected-access
-
-    def _create_path(self, path: str) -> PathHelper:
-        """
-        Create a path to sanitize function by replacing / and \\ in the provided path with `separator_to_sanitize`.
-        Also, create a path sanitized using `separator_sanitized`.
-
-        Args:
-            path (str): The path to create
-
-        Returns:
-            PathHelper: The path to sanitize and sanitized
-        """
-        path_to_sanitize: str = path \
-            .replace(DirectorySeparator.BACKSLASH.value, self._separator_to_sanitize.value) \
-            .replace(DirectorySeparator.SLASH.value, self._separator_to_sanitize.value)
-        path_sanitized: str = PathSanitizer(self._separator_sanitized).sanitize(path, True)
-
-        return PathHelper(path_to_sanitize, path_sanitized)
-
-    def _create_byte_array(self) -> bytes:
-        """
-        Create a byte array from a string.
-
-        Returns:
-            bytearray: The byte array.
-        """
-        return bytes(PathSanitizerStorageDriverDecoratorTests.FAKE.sentence(), "utf-8")
-
-    def _create_input_stream(self) -> BufferedReader:
-        """
-        Create an input stream from a byte array (`create_byte_array`).
-
-        Returns:
-            InputStream: The input stream.
-        """
-        bytes_handle = BytesIO(self._create_byte_array())
-        return BufferedReader(bytes_handle)  # type: ignore[arg-type]
 
     def test_open__verify_method_invocation__then_return_void(
             self

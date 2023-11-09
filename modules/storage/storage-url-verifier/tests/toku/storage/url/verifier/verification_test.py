@@ -129,6 +129,34 @@ class VerificationTest(ABC, EnforceOverrides, Generic[T]):
     Provides test cases for any kind Verification class.
     """
 
+    def _initialize_test(self) -> None:
+        """
+        Common initialize processes.
+        """
+
+    def _teardown_test(self) -> None:
+        """
+        Common teardown processes.
+        """
+
+    @abstractmethod
+    def _create_valids_cases(self) -> list[ValidCase]:
+        """
+        Provides a list of valids cases.
+
+        Returns:
+            list[ValidCase]: The list of valids cases.
+        """
+
+    @abstractmethod
+    def _create_invalids_cases(self) -> list[InvalidCase]:
+        """
+        Provides a list of invalids cases.
+
+        Returns:
+            list[InvalidCase]: The list of invalids cases.
+        """
+
     @pytest.fixture(autouse=True)
     def setup_test(self) -> Generator[None, None, None]:
         """
@@ -185,31 +213,3 @@ class VerificationTest(ABC, EnforceOverrides, Generic[T]):
     ) -> None:
         for case in invalids_cases:
             case.run()
-
-    def _initialize_test(self) -> None:
-        """
-        Common initialize processes.
-        """
-
-    def _teardown_test(self) -> None:
-        """
-        Common teardown processes.
-        """
-
-    @abstractmethod
-    def _create_valids_cases(self) -> list[ValidCase]:
-        """
-        Provides a list of valids cases.
-
-        Returns:
-            list[ValidCase]: The list of valids cases.
-        """
-
-    @abstractmethod
-    def _create_invalids_cases(self) -> list[InvalidCase]:
-        """
-        Provides a list of invalids cases.
-
-        Returns:
-            list[InvalidCase]: The list of invalids cases.
-        """

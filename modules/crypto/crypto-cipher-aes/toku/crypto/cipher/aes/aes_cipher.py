@@ -12,16 +12,19 @@ prior written permission from Toku.
 Module: aes_cipher.py
 Author: Toku
 """
-from typing import Optional, final
+from typing import final
 from Crypto.Cipher import AES
 from overrides import override
 from toku.crypto.cipher.api import Cipher
 
 
+@final
 class AesCipher(Cipher):
     """
     Provides an AES implementation for encryption and decryption.
     """
+
+    DEFAULT_ENCODING = "UTF-8"
 
     def __init__(self, key: bytes) -> None:
         """
@@ -34,6 +37,8 @@ class AesCipher(Cipher):
         secure ciphertext and it's not a problem the decryption because the
         alghoritm already know how to get this random value from the ciphertext
         to use it during decryption.
+
+        The process always considers to use UTF-8.
 
         For example:
 
@@ -56,29 +61,18 @@ class AesCipher(Cipher):
         """
         self._key: bytes = key
 
-    @final
     @override
-    def encrypt(self, plaintext: Optional[str]) -> str:
-        if not plaintext:
-            return ""
-
+    def encrypt(self, plaintext: bytes) -> bytes:
         cipher = AES.new(self._key, AES.MODE_GCM)
         ciphertext: bytes
         tag: bytes
-        ciphertext, tag = cipher.encrypt_and_digest(plaintext.encode())
-        encrypted_bytes: bytes = bytes(cipher.nonce) + ciphertext + tag
-        return encrypted_bytes.hex()
+        ciphertext, tag = cipher.encrypt_and_digest(plaintext)
+        return bytes(cipher.nonce) + ciphertext + tag
 
-    @final
     @override
-    def decrypt(self, ciphertext: Optional[str]) -> str:
-        if not ciphertext:
-            return ""
-
-        ciphertext_bytes: bytes = bytes.fromhex(ciphertext)
-        nonce: bytes = ciphertext_bytes[:16]
-        tag: bytes = ciphertext_bytes[-16:]
-        ciphertext_bytes = ciphertext_bytes[16:-16]
+    def decrypt(self, ciphertext: bytes) -> bytes:
+        nonce: bytes = ciphertext[:16]
+        tag: bytes = ciphertext[-16:]
+        ciphertext_bytes = ciphertext[16:-16]
         cipher = AES.new(self._key, AES.MODE_GCM, nonce=nonce)
-        decrypted: bytes = cipher.decrypt_and_verify(ciphertext_bytes, tag)
-        return decrypted.decode()
+        return cipher.decrypt_and_verify(ciphertext_bytes, tag)

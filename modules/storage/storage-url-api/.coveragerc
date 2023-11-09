@@ -1,3 +1,7 @@
 [run]
 source =
     toku
+omit =
+    toku/storage/url/api/abstract_storage_url.py
+    toku/storage/url/api/storage_url_decorator.py
+    toku/storage/url/api/storage_url.py

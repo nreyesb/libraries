@@ -31,6 +31,32 @@ class PathSanitizerTests:
 
     FILE_NAME_TO_TEST: str = "1.txt"
 
+    def _create_path_to_sanitize(self, *values: str) -> str:
+        """
+        Creates a path in "to sanitize" format using the `separator_to_sanitize`, it means the path
+        is in its original format.
+
+        Returns:
+            str: The path to sanitize
+        """
+        separator: str = self._separator_to_sanitize.value
+        value: str = separator.join(values)
+        print(f"path_to_sanitize: {value}")
+        return value
+
+    def _create_path_sanitized(self, *values: str) -> str:
+        """
+        Creates a path in "sanitized" format using the `separator_sanitized`, it means the path
+        is in its final format.
+
+        Returns:
+            str: The path sanitized
+        """
+        separator: str = self._separator_sanitized.value
+        value: str = separator.join(values)
+        print(f"path_sanitized: {value}")
+        return value
+
     @pytest.fixture(params=[
         (DirectorySeparator.SLASH, DirectorySeparator.SLASH),
         (DirectorySeparator.SLASH, DirectorySeparator.BACKSLASH),
@@ -75,32 +101,6 @@ class PathSanitizerTests:
         self._separator_to_sanitize: DirectorySeparator
         self._separator_sanitized, self._separator_to_sanitize = request.param
         self._sanitizer: PathSanitizer = PathSanitizer(self._separator_sanitized)
-
-    def _create_path_to_sanitize(self, *values: str) -> str:
-        """
-        Creates a path in "to sanitize" format using the `separator_to_sanitize`, it means the path
-        is in its original format.
-
-        Returns:
-            str: The path to sanitize
-        """
-        separator: str = self._separator_to_sanitize.value
-        value: str = separator.join(values)
-        print(f"path_to_sanitize: {value}")
-        return value
-
-    def _create_path_sanitized(self, *values: str) -> str:
-        """
-        Creates a path in "sanitized" format using the `separator_sanitized`, it means the path
-        is in its final format.
-
-        Returns:
-            str: The path sanitized
-        """
-        separator: str = self._separator_sanitized.value
-        value: str = separator.join(values)
-        print(f"path_sanitized: {value}")
-        return value
 
     def test_sanitize__explicit_false_and_dont_remove_start_directory_separator_and_path_is_null__then_return_string_empty(self) -> None:
         assert self._sanitizer.sanitize(None, False) == ""
