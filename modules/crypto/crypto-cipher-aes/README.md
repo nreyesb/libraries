@@ -35,13 +35,28 @@ The library doesn't require any specific configuration to use it.
 To use the library, you can import it in your Python code:
 
 ```python
+# string
 from toku.crypto.cipher.api import Cipher # optional, if not needed, just remove Cipher type hint or put AesCipher
 from toku.crypto.cipher.aes import AesCipher
 
 key: str = "" # see the documentation of the class
 cipher: Cipher = AesCipher(key)
-ciphertext: str = cipher.encrypt("my_text")
-plaintext: str = cipher.decrypt(ciphertext)
+ciphertext: str = cipher.encrypt("my_text", "UTF-8")
+plaintext: str = cipher.decrypt(ciphertext, "UTF-8")
+
+print(ciphertext)
+print(plaintext)
+```
+
+```python
+# bytes
+from toku.crypto.cipher.api import Cipher # optional, if not needed, just remove Cipher type hint or put AesCipher
+from toku.crypto.cipher.aes import AesCipher
+
+key: str = "" # see the documentation of the class
+cipher: Cipher = AesCipher(key)
+ciphertext: bytes = cipher.encrypt(b"my_text")
+plaintext: bytes = cipher.decrypt(ciphertext)
 
 print(ciphertext)
 print(plaintext)

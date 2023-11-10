@@ -35,11 +35,24 @@ The library doesn't require any specific configuration to use it.
 To use the library, you can import it in your Python code:
 
 ```python
+# string
 from toku.crypto.cipher.api import Cipher
 
 cipher: Cipher = create_concrete_implementation()
-ciphertext: str = cipher.encrypt("my_text")
-plaintext: str = cipher.decrypt(ciphertext)
+ciphertext: str = cipher.encrypt("my_text", "UTF-8")
+plaintext: str = cipher.decrypt(ciphertext, "UTF-8")
+
+print(ciphertext)
+print(plaintext)
+```
+
+```python
+# bytes
+from toku.crypto.cipher.api import Cipher
+
+cipher: Cipher = create_concrete_implementation()
+ciphertext: bytes = cipher.encrypt(b"my_text")
+plaintext: bytes = cipher.decrypt(ciphertext)
 
 print(ciphertext)
 print(plaintext)

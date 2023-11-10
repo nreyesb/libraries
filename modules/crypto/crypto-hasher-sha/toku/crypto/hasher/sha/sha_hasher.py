@@ -14,7 +14,7 @@ Author: Toku
 """
 from enum import Enum
 import hashlib
-from typing import Optional, final
+from typing import final
 from overrides import override
 from toku.crypto.hasher.api import Hasher
 
@@ -50,10 +50,7 @@ class ShaHasher(Hasher):
 
     @final
     @override
-    def hash(self, plaintext: Optional[str]) -> str:
-        if not plaintext:
-            return ""
-
+    def _hash_bytes(self, plaintext: bytes) -> bytes:
         hasher = hashlib.new(self._sha_type)
-        hasher.update(plaintext.encode("utf-8"))
-        return hasher.hexdigest()
+        hasher.update(plaintext)
+        return hasher.digest()

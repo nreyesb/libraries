@@ -43,12 +43,25 @@ class HasherTest(ABC, EnforceOverrides, Generic[T]):
         """
 
     @abstractmethod
-    def _create_plain_vs_hasher_texts(self) -> dict[str, str]:
+    def _create_hasher_vs_plain_texts_for_bytes(self) -> list[tuple[bytes, bytes]]:
         """
-        Provides a dict with plain vs hasher texts for testing.
+        Provides a list of tuples with hasher and plain texts for testing.
+
+        The first position is the hashertext and the second the plaintext.
 
         Returns:
-            dict[str, str]: The dict with the plain and hasher texts for testing.
+            list[tuple[str, str]]: The list of tuples with the hasher and plain texts for testing.
+        """
+
+    @abstractmethod
+    def _create_hasher_vs_plain_texts_for_string(self) -> list[tuple[str, str, str]]:
+        """
+        Provides a list of tuples with hasher and plain texts for testing.
+
+        The first position is the hashertext, the second the plaintext and the third the encoding.
+
+        Returns:
+            list[tuple[str, str, str]]: The list of tuples with the hasher and plain texts for testing.
         """
 
     @pytest.fixture(autouse=True)
@@ -68,62 +81,79 @@ class HasherTest(ABC, EnforceOverrides, Generic[T]):
         yield
 
     @pytest.fixture
-    def plain_vs_hasher_texts(self) -> dict[str, str]:
+    def hasher_vs_plain_texts_for_bytes(self) -> list[tuple[bytes, bytes]]:
         """
-        Fixture to return a dict with plain vs hasher texts for testing.
+        Fixture to return a list of tuples with hasher and plain texts for decryption testing.
         """
-        values: dict[str, str] = self._create_plain_vs_hasher_texts()
+        values: list[tuple[bytes, bytes]] = self._create_hasher_vs_plain_texts_for_bytes()
+        assert values
+        return values
+
+    @pytest.fixture
+    def hasher_vs_plain_texts_for_string(self) -> list[tuple[str, str, str]]:
+        """
+        Fixture to return a list of tuples with hasher and plain texts for decryption testing.
+        """
+        values: list[tuple[str, str, str]] = self._create_hasher_vs_plain_texts_for_string()
         assert values
         return values
 
     @final
-    def test_hash__with_none_text__then_return_empty_string(self) -> None:
-        """
-        Verifies hash case for none text.
-
-        Args:
-            hasher (T): An instance of the Hasher class for testing.
-        """
-        assert self._hasher.hash(None) == ""
-
-    @final
-    def test_hash__with_empty_text__then_return_empty_string(self) -> None:
+    def test_hash__string_value_with_empty_text__then_return_empty_string(self) -> None:
         """
         Verifies hash case for empty text.
 
         Args:
             hasher (T): An instance of the Hasher class for testing.
         """
-        assert self._hasher.hash("") == ""
+        assert self._hasher.hash("", "UTF-8") == ""
 
     @final
-    def test_hash__with_blank_text__then_return_no_empty_string(self) -> None:
+    def test_hash__string_value_with_blank_text__then_return_no_empty_string(self) -> None:
         """
         Verifies hash case for blank text.
 
         Args:
             hasher (T): An instance of the Hasher class for testing.
         """
-        assert self._hasher.hash(" ") != ""
+        assert self._hasher.hash(" ", "UTF-8") != ""
 
     @final
-    def test_hash__with_reported_text__then_return_encrypted_string(
+    def test_hash__string_value_with_reported_text__then_return_encrypted_string(
         self,
-        plain_vs_hasher_texts: dict[str, str]
+        hasher_vs_plain_texts_for_string: list[tuple[str, str, str]]
     ) -> None:
         """
-        Verifies hashes case for not none and not empty text.
-
-        Every plaintext in the dict plain_vs_hasher_texts is hashes where
+        Every plaintext in the list `hasher_vs_plain_texts_for_string` is hashes where
         the result has to be distinct to the original plaintext and equals to
         the hashertext.
 
         Args:
             hasher (T): An instance of the Hasher class for testing.
-            plain_vs_hasher_texts (dict[str, str]): Plain vs hasher texts for testing
+            hasher_vs_plain_texts_for_string (list[tuple[str, str, str]]): Hasher and plain texts for testing
         """
-        for plaintext, hashertext in plain_vs_hasher_texts.items():
-            hash_value: str = self._hasher.hash(plaintext)
+        for hashertext, plaintext, encoding  in hasher_vs_plain_texts_for_string:
+            hash_value: str = self._hasher.hash(plaintext, encoding)
+            assert hash_value
+            assert hash_value != plaintext
+            assert hash_value == hashertext
+
+    @final
+    def test_hash__bytes_value_with_reported_text__then_return_encrypted_string(
+        self,
+        hasher_vs_plain_texts_for_bytes: list[tuple[bytes, bytes]]
+    ) -> None:
+        """
+        Every plaintext in the list `hasher_vs_plain_texts_for_bytes` is hashes where
+        the result has to be distinct to the original plaintext and equals to
+        the hashertext.
+
+        Args:
+            hasher (T): An instance of the Hasher class for testing.
+            hasher_vs_plain_texts_for_bytes (list[tuple[bytes, bytes]]): Hasher and plain texts for testing
+        """
+        for hashertext, plaintext in hasher_vs_plain_texts_for_bytes:
+            hash_value: bytes = self._hasher.hash(plaintext)
             assert hash_value
             assert hash_value != plaintext
             assert hash_value == hashertext

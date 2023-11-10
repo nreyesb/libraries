@@ -62,7 +62,7 @@ class AesCipher(Cipher):
         self._key: bytes = key
 
     @override
-    def encrypt(self, plaintext: bytes) -> bytes:
+    def _encrypt_bytes(self, plaintext: bytes) -> bytes:
         cipher = AES.new(self._key, AES.MODE_GCM)
         ciphertext: bytes
         tag: bytes
@@ -70,7 +70,7 @@ class AesCipher(Cipher):
         return bytes(cipher.nonce) + ciphertext + tag
 
     @override
-    def decrypt(self, ciphertext: bytes) -> bytes:
+    def _decrypt_bytes(self, ciphertext: bytes) -> bytes:
         nonce: bytes = ciphertext[:16]
         tag: bytes = ciphertext[-16:]
         ciphertext_bytes = ciphertext[16:-16]

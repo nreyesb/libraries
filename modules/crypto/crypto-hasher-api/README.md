@@ -35,9 +35,21 @@ The library doesn't require any specific configuration to use it.
 To use the library, you can import it in your Python code:
 
 ```python
+# string
 from toku.crypto.hasher.api import Hasher
+
 hasher: Hasher = create_concrete_implementation()
-hashertext: str = hasher.hash("my_text")
+hashertext: str = hasher.hash("my_text", "UTF-8")
+
+print(hashertext)
+```
+
+```python
+# bytes
+from toku.crypto.hasher.api import Hasher
+
+hasher: Hasher = create_concrete_implementation()
+hashertext: bytes = hasher.hash(b"my_text")
 
 print(hashertext)
 ```

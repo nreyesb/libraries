@@ -13,7 +13,7 @@ Module: cipher.py
 Author: Toku
 """
 from abc import ABC, abstractmethod
-from typing import final
+from typing import Optional, final, overload
 from overrides import EnforceOverrides
 
 
@@ -28,7 +28,7 @@ class Cipher(ABC, EnforceOverrides):
     in a non-human-readable form.
     """
 
-    @abstractmethod
+    @overload
     def encrypt(self, plaintext: bytes) -> bytes:
         """
         Encrypts the given `plaintext` in 'bytes'.
@@ -43,8 +43,8 @@ class Cipher(ABC, EnforceOverrides):
             CipherException: If an encryption error occurs.
         """
 
-    @final
-    def encrypt_string(self, plaintext: str, encoding: str) -> str:
+    @overload
+    def encrypt(self, plaintext: str, encoding: str) -> str:
         """
         Encrypts the given `plaintext` in 'string' with the provided
         `encoding` with the following steps:
@@ -66,14 +66,45 @@ class Cipher(ABC, EnforceOverrides):
         Raises:
             CipherException: If an encryption error occurs.
         """
-        if not plaintext:
-            return ""
 
-        plaintext_as_bytes: bytes = plaintext.encode(encoding)
-        ciphertext: bytes = self.encrypt(plaintext_as_bytes)
-        return ciphertext.hex()
+    @final
+    def encrypt(self, plaintext: str | bytes, encoding: Optional[str] = None) -> str | bytes:
+        """
+        Encrypts the given `plaintext`.
+
+        Args:
+            plaintext (str | bytes): The plaintext to encrypt.
+            encoding (Optional[str], optional): The encoding. Defaults to None
+
+        Returns:
+            str | bytes: The ciphertext.
+        """
+        if isinstance(plaintext, str):
+            if not plaintext:
+                return ""
+
+            plaintext_as_bytes: bytes = plaintext.encode(encoding if encoding else "")
+            ciphertext: bytes = self.encrypt(plaintext_as_bytes)
+            return ciphertext.hex()
+
+        return self._encrypt_bytes(plaintext)
 
     @abstractmethod
+    def _encrypt_bytes(self, plaintext: bytes) -> bytes:
+        """
+        Encrypts the given `plaintext` in 'bytes'.
+
+        Args:
+            plaintext (bytes): The plaintext to encrypt.
+
+        Returns:
+            bytes: The ciphertext.
+
+        Raises:
+            CipherException: If an encryption error occurs.
+        """
+
+    @overload
     def decrypt(self, ciphertext: bytes) -> bytes:
         """
         Decrypts the given `ciphertext` in bytes.
@@ -88,8 +119,8 @@ class Cipher(ABC, EnforceOverrides):
             CipherException: If a decryption error occurs.
         """
 
-    @final
-    def decrypt_string(self, ciphertext: str, encoding: str) -> str:
+    @overload
+    def decrypt(self, ciphertext: str, encoding: str) -> str:
         """
         Decrypts the given `ciphertext` in 'string' with the provided
         `encoding` with the following steps:
@@ -111,9 +142,40 @@ class Cipher(ABC, EnforceOverrides):
         Raises:
             CipherException: If an encryption error occurs.
         """
-        if not ciphertext:
-            return ""
 
-        ciphertext_as_bytes: bytes = bytes.fromhex(ciphertext)
-        plaintext: bytes = self.decrypt(ciphertext_as_bytes)
-        return plaintext.decode(encoding)
+    @final
+    def decrypt(self, ciphertext: str | bytes, encoding: Optional[str] = None) -> str | bytes:
+        """
+        Decrypts the given `ciphertext`.
+
+        Args:
+            ciphertext (str | bytes): The ciphertext to decrypt.
+            encoding (Optional[str], optional): The encoding. Defaults to None
+
+        Returns:
+            str | bytes: The plaintext.
+        """
+        if isinstance(ciphertext, str):
+            if not ciphertext:
+                return ""
+
+            ciphertext_as_bytes: bytes = bytes.fromhex(ciphertext)
+            plaintext: bytes = self.decrypt(ciphertext_as_bytes)
+            return plaintext.decode(encoding if encoding else "")
+
+        return self._decrypt_bytes(ciphertext)
+
+    @abstractmethod
+    def _decrypt_bytes(self, ciphertext: bytes) -> bytes:
+        """
+        Decrypts the given `ciphertext` in bytes.
+
+        Args:
+            ciphertext (bytes): The ciphertext to decrypt.
+
+        Returns:
+            bytes: The plaintext.
+
+        Raises:
+            CipherException: If a decryption error occurs.
+        """

@@ -35,6 +35,7 @@ The library doesn't require any specific configuration to use it.
 To use the library, you can import it in your Python code:
 
 ```python
+# string
 from toku.crypto.hasher.api import Hasher # if not needed, just remove type hint or put ShaHasher
 from toku.crypto.hasher.sha import Sha1Hasher
 from toku.crypto.hasher.sha import Sha256Hasher
@@ -42,17 +43,40 @@ from toku.crypto.hasher.sha import Sha512Hasher
 
 # sha1
 hasher: Hasher = Sha1Hasher()
-hashertext: str = hasher.hash("my_text")
+hashertext: str = hasher.hash("my_text", "UTF-8")
 print(hashertext)
 
 # sha256
 hasher = Sha256Hasher()
-hashertext = hasher.hash("my_text")
+hashertext = hasher.hash("my_text", "UTF-8")
 print(hashertext)
 
 # sha512
+hasher = Sha512Hasher()
+hashertext = hasher.hash("my_text", "UTF-8")
+print(hashertext)
+```
+
+```python
+# bytes
+from toku.crypto.hasher.api import Hasher # if not needed, just remove type hint or put ShaHasher
+from toku.crypto.hasher.sha import Sha1Hasher
+from toku.crypto.hasher.sha import Sha256Hasher
+from toku.crypto.hasher.sha import Sha512Hasher
+
+# sha1
 hasher: Hasher = Sha1Hasher()
-hashertext: str = hasher.hash("my_text")
+hashertext: bytes = hasher.hash(b"my_text")
+print(hashertext)
+
+# sha256
+hasher = Sha256Hasher()
+hashertext = hasher.hash(b"my_text")
+print(hashertext)
+
+# sha512
+hasher = Sha512Hasher()
+hashertext = hasher.hash(b"my_text")
 print(hashertext)
 ```
 

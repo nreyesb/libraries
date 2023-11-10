@@ -137,27 +137,46 @@ class CipherTest(ABC, EnforceOverrides, Generic[T]):
         return values
 
     @final
-    def test_encrypt_string__with_empty_text__then_return_empty_string(self) -> None:
+    def test_encrypt__string_value_with_empty_text__then_return_empty_string(self) -> None:
         """
         Verifies encryption case for empty text.
 
         Args:
             cipher (T): An instance of the Cipher class for testing.
         """
-        assert self._cipher.encrypt_string("", "UTF-8") == ""
+        assert self._cipher.encrypt("", "UTF-8") == ""
 
     @final
-    def test_encrypt_string__with_blank_text__then_return_no_empty_string(self) -> None:
+    def test_encrypt__string_value_with_blank_text__then_return_no_empty_string(self) -> None:
         """
         Verifies encryption case for blank text.
 
         Args:
             cipher (T): An instance of the Cipher class for testing.
         """
-        assert self._cipher.encrypt_string(" ", "UTF-8") != ""
+        assert self._cipher.encrypt(" ", "UTF-8") != ""
 
     @final
-    def test_encrypt__with_reported_content__then_return_encrypted_string(
+    def test_encrypt__string_value_with_reported_text__then_return_encrypted_string(
+        self,
+        plain_texts_for_string: list[tuple[str, str]]
+    ) -> None:
+        """
+        Every plaintext in the list plain_texts_for_string is encrypted and then decrypted
+        the result has to be the same plaintext.
+
+        Args:
+            cipher (T): An instance of the Cipher class for testing.
+            plain_texts_for_string (list[tuple[str, str]]): Plain texts for testing
+        """
+        for plaintext, encoding in plain_texts_for_string:
+            ciphertext: str = self._cipher.encrypt(plaintext, encoding)
+            assert ciphertext
+            assert ciphertext != plaintext
+            assert self._cipher.decrypt(ciphertext, encoding) == plaintext
+
+    @final
+    def test_encrypt__bytes_value_with_reported_content__then_return_encrypted_string(
         self,
         plain_texts_for_bytes: list[bytes]
     ) -> None:
@@ -176,36 +195,32 @@ class CipherTest(ABC, EnforceOverrides, Generic[T]):
             assert self._cipher.decrypt(ciphertext) == plaintext
 
     @final
-    def test_encrypt_string__with_reported_text__then_return_encrypted_string(
-        self,
-        plain_texts_for_string: list[tuple[str, str]]
-    ) -> None:
-        """
-        Every plaintext in the list plain_texts_for_string is encrypted and then decrypted
-        the result has to be the same plaintext.
-
-        Args:
-            cipher (T): An instance of the Cipher class for testing.
-            plain_texts_for_string (list[tuple[str, str]]): Plain texts for testing
-        """
-        for plaintext, encoding in plain_texts_for_string:
-            ciphertext: str = self._cipher.encrypt_string(plaintext, encoding)
-            assert ciphertext
-            assert ciphertext != plaintext
-            assert self._cipher.decrypt_string(ciphertext, encoding) == plaintext
-
-    @final
-    def test_decrypt_string__with_empty_text__then_return_empty_string(self) -> None:
+    def test_decrypt__string_value_with_empty_text__then_return_empty_string(self) -> None:
         """
         Verifies decryption case for empty text.
 
         Args:
             cipher (T): An instance of the Cipher class for testing.
         """
-        assert self._cipher.decrypt_string("", "UTF-8") == ""
+        assert self._cipher.decrypt("", "UTF-8") == ""
 
     @final
-    def test_decrypt__with_reported_content__then_return_decrypted_string(
+    def test_decrypt__string_value_with_reported_text__then_return_decrypted_string(
+        self,
+        cipher_vs_plain_texts_for_string: list[tuple[str, str, str]]
+    ) -> None:
+        """
+        Every ciphertext in the list cipher_vs_plain_texts_for_string is decrypted and compared with the plaintext.
+
+        Args:
+            cipher (T): An instance of the Cipher class for testing.
+            cipher_vs_plain_texts_for_string (list[tuple[str, str, str]]): Cipher and plain texts for testing
+        """
+        for ciphertext, plaintext, encoding in cipher_vs_plain_texts_for_string:
+            assert self._cipher.decrypt(ciphertext, encoding) == plaintext
+
+    @final
+    def test_decrypt__bytes_value_with_reported_content__then_return_decrypted_string(
         self,
         cipher_vs_plain_texts_for_bytes: list[tuple[bytes, bytes]]
     ) -> None:
@@ -218,18 +233,3 @@ class CipherTest(ABC, EnforceOverrides, Generic[T]):
         """
         for ciphertext, plaintext in cipher_vs_plain_texts_for_bytes:
             assert self._cipher.decrypt(ciphertext) == plaintext
-
-    @final
-    def test_decrypt_string__with_reported_text__then_return_decrypted_string(
-        self,
-        cipher_vs_plain_texts_for_string: list[tuple[str, str, str]]
-    ) -> None:
-        """
-        Every ciphertext in the list cipher_vs_plain_texts_for_string is decrypted and compared with the plaintext.
-
-        Args:
-            cipher (T): An instance of the Cipher class for testing.
-            cipher_vs_plain_texts_for_string (list[tuple[str, str, str]]): Cipher and plain texts for testing
-        """
-        for ciphertext, plaintext, encoding in cipher_vs_plain_texts_for_string:
-            assert self._cipher.decrypt_string(ciphertext, encoding) == plaintext
