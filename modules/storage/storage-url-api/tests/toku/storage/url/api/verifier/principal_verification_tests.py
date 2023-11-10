@@ -19,10 +19,12 @@ prior written permission from Toku.
 Module: aes_cipher_tests.py
 Author: Toku
 """
+from typing import Type
 from overrides import override
 from toku.storage.url.core import UrlMetadata
 from toku.storage.url.core import Principal
 from toku.storage.url.api.verifier import PrincipalVerification
+from toku.storage.url.api.verifier import UnauthorizedStorageUrlVerificationException
 from tests.toku.storage.url.verifier import VerificationTest
 from tests.toku.storage.url.verifier import ValidCase
 from tests.toku.storage.url.verifier import InvalidCase
@@ -126,6 +128,9 @@ class VerificationPrincipalIsEmptyAndMetatadaPrincipalIsNotEmptyInvalidCase(Inva
     def _create_exception_message(self) -> str:
         return "authorized principal is 'USER_NAME' not ''"
 
+    def _create_exception_type(self) -> Type[UnauthorizedStorageUrlVerificationException]:
+        return UnauthorizedStorageUrlVerificationException
+
 
 class VerificationPrincipalIsNotEmptyAndMetatadaPrincipalIsEmptyInvalidCase(InvalidCase):
 
@@ -143,6 +148,9 @@ class VerificationPrincipalIsNotEmptyAndMetatadaPrincipalIsEmptyInvalidCase(Inva
     def _create_exception_message(self) -> str:
         return "authorized principal is '' not 'USER_NAME'"
 
+    def _create_exception_type(self) -> Type[UnauthorizedStorageUrlVerificationException]:
+        return UnauthorizedStorageUrlVerificationException
+
 
 class VerificationPrincipalIsNotEmptyAndMetatadaPrincipalIsNotEmptyButDifferentsInvalidCase(InvalidCase):
 
@@ -159,6 +167,9 @@ class VerificationPrincipalIsNotEmptyAndMetatadaPrincipalIsNotEmptyButDifferents
 
     def _create_exception_message(self) -> str:
         return "authorized principal is 'USER_NAMe' not 'USER_NAME'"
+
+    def _create_exception_type(self) -> Type[UnauthorizedStorageUrlVerificationException]:
+        return UnauthorizedStorageUrlVerificationException
 
 
 class PrincipalVerificationTests(VerificationTest[PrincipalVerification]):

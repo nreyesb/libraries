@@ -20,12 +20,14 @@ Module: aes_cipher_tests.py
 Author: Toku
 """
 from datetime import timedelta
+from typing import Type
 from overrides import override
 from toku.storage.url.core import UrlMetadata
 from toku.storage.url.core import Condition
 from toku.storage.url.core import DateTimeCondition
 from toku.storage.url.core import DateTime
 from toku.storage.url.api.verifier import DateTimeConditionVerification
+from toku.storage.url.api.verifier import ForbiddenStorageUrlVerificationException
 from tests.toku.storage.url.verifier import VerificationTest
 from tests.toku.storage.url.verifier import ValidCase
 from tests.toku.storage.url.verifier import InvalidCase
@@ -122,6 +124,9 @@ class MetatadaDateTimeConditionOnlyHasAccessFrom30SecondsInTheFutureInvalidCase(
     def _create_exception_message(self) -> str:
         return f"resource will be accessible from {self._access_from}"
 
+    def _create_exception_type(self) -> Type[ForbiddenStorageUrlVerificationException]:
+        return ForbiddenStorageUrlVerificationException
+
 
 class MetatadaDateTimeConditionOnlyHasAccessUntil30SecondsInThePastInvalidCase(InvalidCase):
 
@@ -145,6 +150,9 @@ class MetatadaDateTimeConditionOnlyHasAccessUntil30SecondsInThePastInvalidCase(I
 
     def _create_exception_message(self) -> str:
         return f"resource was accessible until {self._access_until}"
+
+    def _create_exception_type(self) -> Type[ForbiddenStorageUrlVerificationException]:
+        return ForbiddenStorageUrlVerificationException
 
 
 class DateTimeConditionVerificationTests(VerificationTest[DateTimeConditionVerification]):

@@ -14,9 +14,9 @@ Author: Toku
 """
 from overrides import override
 from toku.storage.driver.api import StorageDriver
+from toku.storage.url.api.verifier import ConflictStorageUrlVerificationException
 from toku.storage.url.core import UrlMetadata
 from toku.storage.url.verifier import Verification
-from toku.storage.url.verifier import StorageUrlVerificationException
 
 
 class FileExistsVerification(Verification):
@@ -45,4 +45,6 @@ class FileExistsVerification(Verification):
             StorageUrlVerificationException: Problem with validation integrity
         """
         if not self._storage_driver.exists(url_metadata.path):
-            raise StorageUrlVerificationException(f"file {url_metadata.path} doesn't exists")
+            raise ConflictStorageUrlVerificationException(
+                f"file {url_metadata.path} doesn't exists"
+            )

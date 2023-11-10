@@ -13,11 +13,11 @@ Module: datetime_condition_verification.py
 Author: Toku
 """
 from overrides import override
+from toku.storage.url.api.verifier import ForbiddenStorageUrlVerificationException
 from toku.storage.url.core import DateTimeCondition
 from toku.storage.url.core import DateTime
 from toku.storage.url.core import UrlMetadata
 from toku.storage.url.verifier import Verification
-from toku.storage.url.verifier import StorageUrlVerificationException
 
 
 class DateTimeConditionVerification(Verification):
@@ -47,12 +47,12 @@ class DateTimeConditionVerification(Verification):
 
         if datetime_condition.access_from and \
            now.to_millis() < DateTime.parse(datetime_condition.access_from).to_millis():
-            raise StorageUrlVerificationException(
+            raise ForbiddenStorageUrlVerificationException(
                 f"resource will be accessible from {datetime_condition.access_from}"
             )
 
         if datetime_condition.access_until and \
            now.to_millis() > DateTime.parse(datetime_condition.access_until).to_millis():
-            raise StorageUrlVerificationException(
+            raise ForbiddenStorageUrlVerificationException(
                 f"resource was accessible until {datetime_condition.access_until}"
             )

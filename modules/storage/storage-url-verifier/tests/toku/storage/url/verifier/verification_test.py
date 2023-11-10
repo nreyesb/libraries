@@ -20,7 +20,7 @@ Module: verification_tests.py
 Author: Toku
 """
 from abc import ABC, abstractmethod
-from typing import Generator, Generic, TypeVar, final
+from typing import Generator, Generic, Type, TypeVar, final
 from overrides import EnforceOverrides
 import pytest
 from toku.storage.url.verifier import Verification
@@ -29,6 +29,7 @@ from toku.storage.url.core import UrlMetadata
 
 
 T = TypeVar("T", bound=Verification)
+E = TypeVar("E", bound=StorageUrlVerificationException)
 
 class Case(ABC, Generic[T]):
     """
@@ -100,7 +101,7 @@ class ValidCase(Case, ABC):
         self._verification.verify(self._url_metadata)
 
 
-class InvalidCase(Case, ABC):
+class InvalidCase(Case, ABC, Generic[E]):
     """
     Provides a invalid case to test.
     """
@@ -114,12 +115,21 @@ class InvalidCase(Case, ABC):
             str: The message to assert
         """
 
+    @abstractmethod
+    def _create_exception_type(self) -> Type[E]:
+        """
+        Creates the exception type to assert.
+
+        Returns:
+            Type[E]: The exception type to assert
+        """
+
     @final
     def _main_asserts(self) -> None:
         """
         Performs the asserts.
         """
-        with pytest.raises(StorageUrlVerificationException) as exc_info:
+        with pytest.raises(self._create_exception_type()) as exc_info:
             self._verification.verify(self._url_metadata)
         assert str(exc_info.value) == self._create_exception_message()
 

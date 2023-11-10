@@ -19,10 +19,12 @@ prior written permission from Toku.
 Module: aes_cipher_tests.py
 Author: Toku
 """
+from typing import Type
 from flexmock import flexmock
 from overrides import override
 from toku.storage.url.core import UrlMetadata
 from toku.storage.url.api.verifier import FileExistsVerification
+from toku.storage.url.api.verifier import ConflictStorageUrlVerificationException
 from tests.toku.storage.driver.api import StubStorageDriver
 from tests.toku.storage.url.verifier import VerificationTest
 from tests.toku.storage.url.verifier import ValidCase
@@ -66,6 +68,9 @@ class MetatadaPathDoesntExistsInStorageDriverValidCase(InvalidCase):
 
     def _create_exception_message(self) -> str:
         return f"file {self._path} doesn't exists"
+
+    def _create_exception_type(self) -> Type[ConflictStorageUrlVerificationException]:
+        return ConflictStorageUrlVerificationException
 
 
 class DateTimeConditionVerificationTests(VerificationTest[FileExistsVerification]):
