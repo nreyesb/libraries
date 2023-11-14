@@ -16,7 +16,7 @@ from overrides import override
 from toku.storage.driver.api import StorageDriver
 from toku.storage.url.api.verifier import ConflictStorageUrlVerificationException
 from toku.storage.url.core import UrlMetadata
-from toku.storage.url.verifier import Verification
+from toku.storage.url.verifier.api import Verification
 
 
 class FileExistsVerification(Verification):

@@ -31,7 +31,10 @@
       "path": "modules/storage/storage-url-core"
     },
     {
-      "path": "modules/storage/storage-url-verifier"
+      "path": "modules/storage/storage-url-verifier-api"
+    },
+    {
+      "path": "modules/storage/storage-url-rest"
     }
   ],
   "settings": {

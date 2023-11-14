@@ -12,7 +12,7 @@ prior written permission from Toku.
 Module: conflict_storage_url_verification_exception.py
 Author: Toku
 """
-from toku.storage.url.verifier import StorageUrlVerificationException
+from toku.storage.url.verifier.api import StorageUrlVerificationException
 
 
 class ConflictStorageUrlVerificationException(StorageUrlVerificationException):

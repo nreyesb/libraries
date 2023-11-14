@@ -28,9 +28,9 @@ from toku.storage.url.core import DateTimeCondition
 from toku.storage.url.core import DateTime
 from toku.storage.url.api.verifier import DateTimeConditionVerification
 from toku.storage.url.api.verifier import ForbiddenStorageUrlVerificationException
-from tests.toku.storage.url.verifier import VerificationTest
-from tests.toku.storage.url.verifier import ValidCase
-from tests.toku.storage.url.verifier import InvalidCase
+from tests.toku.storage.url.verifier.api import VerificationTest
+from tests.toku.storage.url.verifier.api import ValidCase
+from tests.toku.storage.url.verifier.api import InvalidCase
 
 
 class MetatadaDateTimeConditionIsDefaultValidCase(ValidCase):

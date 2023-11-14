@@ -21,6 +21,7 @@ Author: Toku
 """
 from abc import ABC, abstractmethod
 from datetime import timedelta
+import os
 from urllib.parse import urlparse
 from io import BufferedReader, BytesIO
 import re
@@ -42,8 +43,8 @@ from toku.storage.url.core import Condition
 from toku.storage.url.core import DateTimeCondition
 from toku.storage.url.core import DateTime
 from toku.storage.url.core import StorageUrlException
-from toku.storage.url.verifier import Verification
-from toku.storage.url.verifier import StorageUrlVerificationException
+from toku.storage.url.verifier.api import Verification
+from toku.storage.url.verifier.api import StorageUrlVerificationException
 
 T = TypeVar("T", bound=AbstractStorageUrl)
 
@@ -437,6 +438,7 @@ class AbstractStorageUrlTest(StorageUrlTest[T], ABC, EnforceOverrides, Generic[T
             content_from_input_stream, total_interation = self._get_content_from_input_stream(url_streaming.data)
 
             assert total_interation > 1
+            assert url_streaming.name == os.path.basename(AbstractStorageUrlTest.DEFAULT_PATH_WITHOUT_EXTENSION)
             assert url_streaming.content_type == AbstractStorageUrlTest.DEFAULT_MIMETYPE
             assert content_from_input_stream == content
 
@@ -463,6 +465,7 @@ class AbstractStorageUrlTest(StorageUrlTest[T], ABC, EnforceOverrides, Generic[T
             content_from_input_stream, total_interation = self._get_content_from_input_stream(url_streaming.data)
 
             assert total_interation > 1
+            assert url_streaming.name == os.path.basename(AbstractStorageUrlTest.DEFAULT_PATH_WITHOUT_EXTENSION)
             assert url_streaming.content_type == AbstractStorageUrlTest.DEFAULT_MIMETYPE
             assert content_from_input_stream == content
 
@@ -487,6 +490,7 @@ class AbstractStorageUrlTest(StorageUrlTest[T], ABC, EnforceOverrides, Generic[T
             content_from_input_stream, total_interation = self._get_content_from_input_stream(url_streaming.data)
 
             assert total_interation > 1
+            assert url_streaming.name == os.path.basename(path)
             assert url_streaming.content_type == AbstractStorageUrlTest.DEFAULT_MIMETYPE
             assert content_from_input_stream == content
 
@@ -511,5 +515,6 @@ class AbstractStorageUrlTest(StorageUrlTest[T], ABC, EnforceOverrides, Generic[T
             content_from_input_stream, total_interation = self._get_content_from_input_stream(url_streaming.data)
 
             assert total_interation > 1
+            assert url_streaming.name == os.path.basename(AbstractStorageUrlTest.DEFAULT_PATH_WITH_EXTENSION)
             assert url_streaming.content_type == "text/plain"
             assert content_from_input_stream == content

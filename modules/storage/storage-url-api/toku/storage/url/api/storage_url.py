@@ -19,7 +19,7 @@ from toku.storage.url.core import Url
 from toku.storage.url.core import UrlMetadata
 from toku.storage.url.core import UrlEncoded
 from toku.storage.url.core import UrlStreaming
-from toku.storage.url.verifier import Verification
+from toku.storage.url.verifier.api import Verification
 
 
 class StorageUrl(ABC, EnforceOverrides):

@@ -44,7 +44,7 @@ class UrlMetadataTests:
 
         assert url_metadata
         assert re.match(r'^[0-9a-z]+-[0-9a-z]+-[0-9a-z]+-[0-9a-z]+-[0-9a-z]+$', url_metadata.id)
-        assert url_metadata.created_at <= int(datetime.utcnow().timestamp() * 1000)
+        assert re.match(r'^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{6} UTC$', url_metadata.created_at)
         assert url_metadata.path == "minimum-data/file.txt"
         assert url_metadata.storage_driver_reference == "storage_reference_min"
         assert url_metadata.classification == Classification.PUBLIC
@@ -78,7 +78,7 @@ class UrlMetadataTests:
 
         assert url_metadata
         assert re.match(r'^[0-9a-z]+-[0-9a-z]+-[0-9a-z]+-[0-9a-z]+-[0-9a-z]+$', url_metadata.id)
-        assert url_metadata.created_at <= int(datetime.utcnow().timestamp() * 1000)
+        assert re.match(r'^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{6} UTC$', url_metadata.created_at)
         assert url_metadata.path == "full-data/file.txt"
         assert url_metadata.storage_driver_reference == "storage_reference_max"
         assert url_metadata.classification == Classification.CONFIDENTIAL

@@ -28,7 +28,6 @@ poetry run python -m pip install {artifact_path}
 
 ##### Configuration
 
-TODO
 The library doesn't require any specific configuration to use it.
 
 ##### Example

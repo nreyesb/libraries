@@ -16,7 +16,7 @@ from io import BufferedReader, BytesIO
 import os
 from tempfile import NamedTemporaryFile
 import time
-from typing import final
+from typing import Optional, final
 from google.oauth2 import service_account  # type:ignore[import-untyped]
 from google.cloud import storage  # type:ignore[import-untyped]
 from overrides import override
@@ -74,7 +74,7 @@ class GcsStorageDriver(AbstractStorageDriver):
             root: str,
             project_id: str,
             bucket_name: str,
-            credentials_file: str
+            credentials_file: Optional[str] = None
     ) -> None:
         """
         Initializes a new GCS (Google Cloud Storage) storage driver.
@@ -83,17 +83,21 @@ class GcsStorageDriver(AbstractStorageDriver):
             root (str): The working directory (without the bucket name).
             project_id (str): The GCP (Google Cloud Platform) project ID.
             bucket_name (str): The name of the bucket.
-            credentials_file (str): The path to the credential file. It's recommended to
-                                    use a service account.
+            credentials_file (Optional[str], optional): The path to the credential file.
+                                                        It's recommended to use a service account.
         """
         super().__init__(root, DirectorySeparator.SLASH)
         self._project_id: str = project_id
         self._bucket_name: str = bucket_name
-        self._credentials_file: str = credentials_file
+        self._credentials_file: Optional[str] = credentials_file
 
     @override
     def open(self) -> None:
-        credentials = service_account.Credentials.from_service_account_file(self._credentials_file)
+        credentials = service_account.Credentials.from_service_account_file(
+            self._credentials_file
+            if self._credentials_file
+            else os.getenv("GOOGLE_APPLICATION_CREDENTIALS", "")
+        )
 
         if credentials.project_id != self._project_id:
             raise StorageDriverException(

@@ -25,9 +25,9 @@ from toku.storage.url.core import UrlMetadata
 from toku.storage.url.core import Principal
 from toku.storage.url.api.verifier import PrincipalVerification
 from toku.storage.url.api.verifier import UnauthorizedStorageUrlVerificationException
-from tests.toku.storage.url.verifier import VerificationTest
-from tests.toku.storage.url.verifier import ValidCase
-from tests.toku.storage.url.verifier import InvalidCase
+from tests.toku.storage.url.verifier.api import VerificationTest
+from tests.toku.storage.url.verifier.api import ValidCase
+from tests.toku.storage.url.verifier.api import InvalidCase
 
 
 class VerificationPrincipalIsEmptyAndMetatadaPrincipalIsEmptyValidCase(ValidCase):

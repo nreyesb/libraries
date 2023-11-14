@@ -2,8 +2,8 @@
 name = "toku-storage-url-core"
 version = "0.1.0"
 description = "Project that provides the core for operating with storage url"
-license = "Internal"
 authors = ["Toku <dev@trytoku.com>"]
+license = "Internal"
 readme = "README.md"
 homepage = "https://www.jira.com"
 repository = "https://www.github.com"
@@ -14,22 +14,22 @@ packages = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.11"
-overrides = "^7.4.0"
+python = "^3.10"
+overrides = "==7.4.0"
 
 
 [tool.poetry.group.dev.dependencies]
-pylint = "^3.0.1"
-flake8 = "^6.1.0"
-mypy = "^1.5.1"
-black = "^23.9.1"
+pylint = "==3.0.2"
+flake8 = "==6.1.0"
+mypy = "==1.7.0"
+black = "==23.11.0"
 
 [tool.poetry.group.test.dependencies]
-pytest = "^7.4.2"
-pytest-cov = "^4.1.0"
-pytest-xdist = "^3.3.1"
-flexmock = "^0.11.3"
-faker = "^19.11.0"
+pytest = "==7.4.3"
+pytest-cov = "==4.1.0"
+pytest-xdist = "==3.3.1"
+flexmock = "==0.11.3"
+faker = "==20.0.0"
 
 [build-system]
 requires = ["poetry-core"]

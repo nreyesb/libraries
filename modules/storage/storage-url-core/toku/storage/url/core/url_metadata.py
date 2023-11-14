@@ -16,7 +16,7 @@ from dataclasses import dataclass, field
 from datetime import datetime, timezone, timedelta
 from enum import Enum
 import os
-from typing import Dict, Self
+from typing import Dict
 import uuid
 
 
@@ -68,7 +68,7 @@ class DateTime:
         datetime_utc: datetime = datetime.strptime(date_time, DateTime.DATETIME_FORMAT)
         return DateTime(datetime_utc)
 
-    def delta(self, delta: timedelta) -> Self:
+    def delta(self, delta: timedelta) -> 'DateTime':
         """
         Apply a `delta` to the internal datetime.
 
@@ -177,7 +177,7 @@ class UrlMetadata:
     """
 
     id: str  # the unique identifier of the url metadata
-    created_at: int  # indicates in UTC when was created the metadata
+    created_at: str  # indicates in UTC when was created the metadata
     path: str  # the full path of the resource inside the storage driver
     storage_driver_reference: str  # the reference to create the storage driver
     classification: Classification  # the classification of the data
@@ -227,14 +227,14 @@ class UrlMetadataBuilder:
         metadata = {}
 
         id is always a UUID with uuid.NAMESPACE_DNS and an urandom of size 128.
-        created_at is always the time in millis of the current date in UTC.
+        created_at is always the time as string of the current date in UTC.
 
         Args:
             path (str): The full path of the resource inside the storage driver.
             storage_driver_reference (str): The reference to create the storage driver.
         """
         self._id: str = str(uuid.uuid5(uuid.NAMESPACE_DNS, str(os.urandom(128))))
-        self._created_at: int = DateTime.create().to_millis()
+        self._created_at: str = DateTime.create().to_string()
         self._path: str = path
         self._storage_driver_reference: str = storage_driver_reference
         self._classification: Classification = Classification.PUBLIC

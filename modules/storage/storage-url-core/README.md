@@ -4,7 +4,7 @@ This library aims to provide the core elements to use storage Url process.
 
 ## Works with
 
-This requiries **python 3.11 or higher** and it's recommended to use [pyenv](https://github.com/pyenv/pyenv) for management python versions.
+This requiries **python 3.10 or higher** and it's recommended to use [pyenv](https://github.com/pyenv/pyenv) for management python versions.
 
 ### As Library
 

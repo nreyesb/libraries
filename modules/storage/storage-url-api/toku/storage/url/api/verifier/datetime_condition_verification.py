@@ -17,7 +17,7 @@ from toku.storage.url.api.verifier import ForbiddenStorageUrlVerificationExcepti
 from toku.storage.url.core import DateTimeCondition
 from toku.storage.url.core import DateTime
 from toku.storage.url.core import UrlMetadata
-from toku.storage.url.verifier import Verification
+from toku.storage.url.verifier.api import Verification
 
 
 class DateTimeConditionVerification(Verification):

@@ -14,6 +14,7 @@ Author: Toku
 """
 from abc import ABC, abstractmethod
 from io import BufferedReader
+import os
 from typing import Optional, final
 from overrides import override
 from toku.storage.driver.api import StorageDriver
@@ -23,7 +24,7 @@ from toku.storage.url.core import UrlMetadata
 from toku.storage.url.core import UrlEncoded
 from toku.storage.url.core import UrlStreaming
 from toku.storage.url.core import StorageUrlException
-from toku.storage.url.verifier import Verification
+from toku.storage.url.verifier.api import Verification
 from toku.storage.url.api import StorageUrl
 from toku.storage.url.api.verifier import FileExistsVerification
 from toku.storage.url.api.verifier import DateTimeConditionVerification
@@ -94,8 +95,9 @@ class AbstractStorageUrl(StorageUrl, ABC):
             raise StorageUrlException("input stream obtained is none")
 
         return UrlStreaming(
-            mimetype if mimetype else "application/octet-stream",
-            input_stream
+            name=os.path.basename(url_metadata.path),
+            content_type=mimetype if mimetype else "application/octet-stream",
+            data=input_stream
         )
 
     @abstractmethod

@@ -30,11 +30,15 @@ class UrlStreamingTests:
     Provides test cases for class UrlStreaming class.
     """
 
+    RESOURCE_NAME = "resource-name.ext"
+    RESOURCE_CONTENT_TYPE = "application/octet-stream"
+
     @pytest.fixture
     def create_url_streaming(self) -> UrlStreaming:
         return UrlStreaming(
-            "application/octet-stream",
-            BufferedReader(BytesIO(b"text"))  # type: ignore[arg-type]
+            name=UrlStreamingTests.RESOURCE_NAME,
+            content_type=UrlStreamingTests.RESOURCE_CONTENT_TYPE,
+            data=BufferedReader(BytesIO(b"text"))  # type: ignore[arg-type]
         )
 
     def test_data_close__no_interaction_after_closing__then_return_void(
@@ -42,6 +46,8 @@ class UrlStreamingTests:
         create_url_streaming: UrlStreaming
     ) -> None:
         with create_url_streaming as url_streaming:
+            assert url_streaming.name == UrlStreamingTests.RESOURCE_NAME
+            assert url_streaming.content_type == UrlStreamingTests.RESOURCE_CONTENT_TYPE
             assert url_streaming.data.read() == b"text"
             url_streaming.data.seek(0)
             assert url_streaming.data.read() == b"text"
@@ -52,6 +58,8 @@ class UrlStreamingTests:
         create_url_streaming: UrlStreaming
     ) -> None:
         with create_url_streaming as url_streaming:
+            assert url_streaming.name == UrlStreamingTests.RESOURCE_NAME
+            assert url_streaming.content_type == UrlStreamingTests.RESOURCE_CONTENT_TYPE
             assert url_streaming.data.read() == b"text"
             url_streaming.data.seek(0)
             assert url_streaming.data.read() == b"text"
